@@ -1,51 +1,55 @@
-import {create} from 'zustand'
+import { create } from 'zustand'
+import { View, Image, Text, Button } from './defaultNodes'
 
 export type ComponentType = 'View' | 'Text' | 'Button' | 'Image';
 
 export interface ComponentNode {
-    id: string;                  // unique identifier
-    type: ComponentType;         // type of component
-    x: number;                   // X position on canvas
-    y: number;                   // Y position on canvas
+    id: string;
+    type: ComponentType;
+    x: number;
+    y: number;
     style: {
-
-        /* GENERAL STYLING */
         width?: number | string;
         height?: number | string;
 
-        /* VIEW STYLES */
-        flexDirection?: 'row' | 'col' | 'row-reverse' | 'col-reverse'
+        flexDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse'
         padding?: number;
         borderRadius?: number;
         borderWidth?: number;
         borderColor?: string;
         backgroundColor?: string;
 
-        /* IMAGE STYLES*/
         resizeMode?: 'center' | 'contain' | 'stretch' | 'repeat' | 'cover'
 
-        /* TEXT STYLES */
         fontSize?: number;
         fontWeight?: 'normal' | 'bold';
         color?: string;
         textAlign?: 'left' | 'center' | 'right';
     };
-    content?: string;            // Text for Text/Button, URL for Image
-    children?: ComponentNode[];   // only Views can have children
+    content?: string;
+    children?: ComponentNode[];
 }
 
-interface CanvasState{
-    componentTree: ComponentNode[],
-    selectedID: string|null,
+interface CanvasState {
+    componentTree: ComponentNode[];
+    selectedID: string | null;
 
-    // addComponent: (componentNode: ComponentNode, selectedID: string|null) => null
+    addNode: (componentNode: ComponentNode, selectedID: string | null) => void;
 }
 
-const useComponentNodeStore = create<CanvasState>((get, set) => ({
+export const useComponentNodeStore = create<CanvasState>((set,get) => ({
     componentTree: [],
     selectedID: null,
 
+    addNode: (componentNode) => {
+        const { selectedID } = get();
 
-}))
-
-
+        if (!selectedID) {
+            set((state) => ({
+                componentTree: [...state.componentTree, componentNode]
+            }))
+            return;
+        }
+        // handle child insert here
+    }
+}));
