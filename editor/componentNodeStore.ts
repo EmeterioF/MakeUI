@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { View, Image, Text, Button } from './defaultNodes'
 
 export type ComponentType = 'View' | 'Text' | 'Button' | 'Image';
 
@@ -31,9 +30,14 @@ export interface ComponentNode {
 }
 
 interface CanvasState {
+    //THE COMPONENT TREE
     componentTree: ComponentNode[];
-    selectedID: string | null;
 
+    //NODE SELECTION
+    selectedID: string | null;
+    selectNode: (id:string) => void;
+
+    //EDITOR CRUD FUNCTIONS
     addNode: (componentNode: ComponentNode, selectedID: string | null) => void;
 }
 
@@ -41,8 +45,16 @@ export const useComponentNodeStore = create<CanvasState>((set,get) => ({
     componentTree: [],
     selectedID: null,
 
-    addNode: (componentNode) => {
+    selectNode: (id) => set((state) => ({
+        selectedID: state.selectedID === id ? null : id //selecting node witht toggle function
+    })),
+
+    addNode: (componentNode, selectedNode?) => {
         const { selectedID } = get();
+
+        if(selectedID){
+            //made it a child of the selected id
+        }
 
         if (!selectedID) {
             set((state) => ({
@@ -50,6 +62,7 @@ export const useComponentNodeStore = create<CanvasState>((set,get) => ({
             }))
             return;
         }
-        // handle child insert here
-    }
+
+    },
+
 }));

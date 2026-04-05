@@ -1,49 +1,30 @@
-import {ComponentNode} from '@/editor/componentNodeStore'
+// defaultNodes.ts — these are TEMPLATES only, always spread + new id before adding
+import { ComponentNode } from '@/editor/componentNodeStore';
 
-
-export const View:ComponentNode =  {
-    id: 'hero',
+export const ViewDefault: Omit<ComponentNode, 'id'> = {
     type: 'View',
-    x: 0,
-    y: 0,
-    style: {
-        flexDirection: 'row',
-        borderColor: '#8d8d8d',
-        width: 500,
-        height: 200,
-    },
+    x: 40, y: 40,
+    style: { width: 200, height: 120, backgroundColor: '#e8e8e8', borderColor: '#8d8d8d', borderWidth: 1 },
     children: [],
-}
+};
 
-export const Image:ComponentNode = {
-    id: 'hero',
-    type: 'View',
-    x: 0,
-    y: 0,
-    style: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover'
-    },
-    content: '',
-    children: [],
-}
-
-export const Text:ComponentNode = {
-    id: 'hero',
-    type: 'View',
-    x: 0,
-    y: 0,
-    style: {
-    },
+export const TextDefault: Omit<ComponentNode, 'id'> = {
+    type: 'Text',
+    x: 40, y: 40,
+    style: { fontSize: 16, color: '#000' },
     content: 'Text',
-}
+};
 
-export const Button:ComponentNode = {
-    id: 'hero',
-    type: 'View',
-    x: 0,
-    y: 0,
-    style: {},
-    content: 'Button'
-}
+export const ButtonDefault: Omit<ComponentNode, 'id'> = {
+    type: 'Button',
+    x: 40, y: 40,
+    style: { width: 120, height: 44, backgroundColor: '#6200EE', borderRadius: 8, color: '#fff', fontSize: 14 },
+    content: 'Button',
+};
+
+export const ImageDefault: Omit<ComponentNode, 'id'> = {
+    type: 'Image',
+    x: 40, y: 40,
+    style: { width: 160, height: 120, resizeMode: 'cover' },
+    content: '',
+};

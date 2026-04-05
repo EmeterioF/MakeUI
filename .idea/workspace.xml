@@ -5,8 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="254effca-3266-4261-b3ba-e7d618a59df9" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/renderer/componentRenderer.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/renderer/nodeStyles.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/componentNodeStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/componentNodeStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/defaultNodes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/defaultNodes.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,7 +51,7 @@
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;ejs.close.delimiter&quot;: &quot;%&gt;&quot;,
     &quot;ejs.open.delimiter&quot;: &quot;&lt;%&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/editor-functionalities&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;F:/appDevelopment/MakeUI&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -61,6 +65,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\appDevelopment\MakeUI\renderer" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -81,6 +90,13 @@
       <workItem from="1774426217428" duration="5287000" />
       <workItem from="1774448275082" duration="1652000" />
       <workItem from="1774450634117" duration="315000" />
+      <workItem from="1774450996910" duration="1180000" />
+      <workItem from="1775109039411" duration="645000" />
+      <workItem from="1775109704153" duration="776000" />
+      <workItem from="1775110501940" duration="4814000" />
+      <workItem from="1775118834346" duration="1653000" />
+      <workItem from="1775368780783" duration="3872000" />
+      <workItem from="1775375071391" duration="4431000" />
     </task>
     <servers />
   </component>
