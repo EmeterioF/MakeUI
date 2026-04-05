@@ -39,6 +39,7 @@ interface CanvasState {
 
     //EDITOR CRUD FUNCTIONS
     addNode: (componentNode: ComponentNode, selectedID: string | null) => void;
+    deleteNode: (id: string | null)  => void
 }
 
 export const useComponentNodeStore = create<CanvasState>((set,get) => ({
@@ -64,5 +65,31 @@ export const useComponentNodeStore = create<CanvasState>((set,get) => ({
         }
 
     },
+
+    deleteNode: (selectedID) => {
+        /*
+        * check the selected id
+        * search the selected id in the component tree
+        * update the component tree
+        * */
+        if(!selectedID) return
+
+        const deleteNodeRecursive = (nodes: ComponentNode[], id: string): ComponentNode[] => {
+            return nodes
+                .filter(node => node.id !== id) // remove target node
+                .map(node => ({ //then recursively delete the node for the children if not found in the first iteration of the filter
+                    ...node,
+                    children: node.children
+                        ? deleteNodeRecursive(node.children, id)
+                        : undefined
+                }));
+        };
+
+        set((state) => ({
+            componentTree: deleteNodeRecursive(state.componentTree, selectedID),
+            selectedID: state.selectedID === selectedID ? null : state.selectedID
+        }));
+    }
+
 
 }));
