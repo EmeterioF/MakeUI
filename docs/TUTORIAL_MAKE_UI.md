@@ -70,8 +70,8 @@ Checkpoint:
 
 ### Step 3: Render the canvas recursively
 Create:
-- `src/features/editor/components/Canvas/CanvasViewport.tsx`
-- `src/features/editor/components/Canvas/CanvasNode.tsx`
+- `src/features/editor/components/Index/CanvasViewport.tsx`
+- `src/features/editor/components/Index/CanvasNode.tsx`
 
 Goal:
 - Render root nodes and children recursively.
@@ -116,7 +116,7 @@ Checkpoint:
 
 ### Step 7: Add resize handles
 Create:
-- `src/features/editor/components/Canvas/ResizeHandles.tsx`
+- `src/features/editor/components/Index/ResizeHandles.tsx`
 - `src/features/editor/store/actions/resizeNode.ts`
 
 Goal:

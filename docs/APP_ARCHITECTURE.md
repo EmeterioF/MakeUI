@@ -26,7 +26,7 @@ src/
   features/
     editor/
       components/
-        Canvas/
+        Index/
           CanvasViewport.tsx
           CanvasNode.tsx
           SelectionOverlay.tsx

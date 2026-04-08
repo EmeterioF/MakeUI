@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import ComponentRenderer from "@/renderer/componentRenderer";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -8,17 +8,12 @@ import EditBottomSheet from "@/components/editBottomSheet";
 
 export default function Index() {
 
-    const selectedID= useComponentNodeStore(s => s.selectedID);
-
-    const addNode= useComponentNodeStore(s => s.addNode);
-    const deleteNode= useComponentNodeStore(s => s.deleteNode);
-
     const componentTree = useComponentNodeStore(s => s.componentTree);
 
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            {/* Canvas */}
+            {/* Index */}
             <View style={styles.canvas}>
                 {componentTree.map((node) => (
                     <ComponentRenderer
