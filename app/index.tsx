@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
-import { ViewDefault, TextDefault, ButtonDefault, ImageDefault } from '@/editor/defaultNodes'
 import ComponentRenderer from "@/renderer/componentRenderer";
-import { nanoid } from 'nanoid/non-secure';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import EditBottomSheet from "@/components/editBottomSheet";
+
 
 export default function Index() {
 
@@ -14,9 +15,9 @@ export default function Index() {
 
     const componentTree = useComponentNodeStore(s => s.componentTree);
 
-    return (
-        <View style={styles.container}>
 
+    return (
+        <GestureHandlerRootView style={styles.container}>
             {/* Canvas */}
             <View style={styles.canvas}>
                 {componentTree.map((node) => (
@@ -27,27 +28,10 @@ export default function Index() {
                 ))}
             </View>
 
-            {/* Add buttons */}
-            <View style={styles.toolbar}>
-                <Pressable style={styles.btn} onPress={() => addNode({ ...ViewDefault,   id: nanoid() }, null)}>
-                    <Text style={styles.btnText}>+ View</Text>
-                </Pressable>
-                <Pressable style={styles.btn} onPress={() => addNode({ ...ImageDefault,  id: nanoid() }, null)}>
-                    <Text style={styles.btnText}>+ Image</Text>
-                </Pressable>
-                <Pressable style={styles.btn} onPress={() => addNode({ ...TextDefault,   id: nanoid() }, null)}>
-                    <Text style={styles.btnText}>+ Text</Text>
-                </Pressable>
-                <Pressable style={styles.btn} onPress={() => addNode({ ...ButtonDefault, id: nanoid() }, null)}>
-                    <Text style={styles.btnText}>+ Button</Text>
-                </Pressable>
+            {/* BOTTOM SHEET - PROPERTIES AND ADD COMPONENTS PANEL */}
+            <EditBottomSheet/>
 
-                <Pressable style={styles.btn} onPress={() => deleteNode(selectedID)}>
-                    <Text style={styles.btnText}>+ Button</Text>
-                </Pressable>
-            </View>
-
-        </View>
+        </GestureHandlerRootView>
     );
 }
 

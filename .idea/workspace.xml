@@ -5,12 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="254effca-3266-4261-b3ba-e7d618a59df9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/renderer/componentRenderer.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/renderer/nodeStyles.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/editBottomSheet.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/componentNodeStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/componentNodeStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/editor/defaultNodes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/defaultNodes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,8 +20,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript JSX File" />
         <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
       </list>
     </option>
   </component>
@@ -96,7 +96,10 @@
       <workItem from="1775110501940" duration="4814000" />
       <workItem from="1775118834346" duration="1653000" />
       <workItem from="1775368780783" duration="3872000" />
-      <workItem from="1775375071391" duration="4431000" />
+      <workItem from="1775375071391" duration="4723000" />
+      <workItem from="1775393585674" duration="1042000" />
+      <workItem from="1775395013547" duration="1413000" />
+      <workItem from="1775635440792" duration="3694000" />
     </task>
     <servers />
   </component>
