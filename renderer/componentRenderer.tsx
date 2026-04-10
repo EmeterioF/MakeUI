@@ -9,7 +9,7 @@ function ComponentRenderer({ node } : {node: ComponentNode}) {
     const onSelect = useComponentNodeStore(s => s.selectNode);
 
     const isSelected = selectedID === node.id;
-    const handlePress = () => onSelect(node.id);
+    const handlePress = () => isSelected? onSelect(''): onSelect(node.id);
     const s = getNodeStyle(node, isSelected);
 
     switch (node.type) {

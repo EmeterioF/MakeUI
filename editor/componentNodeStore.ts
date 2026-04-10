@@ -38,6 +38,19 @@ interface CanvasState {
 
 const generateId = () => Math.random().toString(36).slice(2, 9);
 
+export const findNode = (nodes: any[], id: string | null): any => {
+    if (!id) return null
+
+    for (const node of nodes) {
+        if (node.id === id) return node
+        if (node.children) {
+            const found = findNode(node.children, id)
+            if (found) return found
+        }
+    }
+    return null
+}
+
 // ─── Simple recursive helper for all operations ────────────────────────────────
 const traverseTree = (
     nodes: ComponentNode[], // the component tree to be passed
@@ -106,9 +119,18 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
 
     editNode: (id, updates) => {
         set(state => ({
-            componentTree: traverseTree(state.componentTree, (node) =>
-                node.id === id ? { ...node, ...updates } : node
-            ),
-        }));
-    },
+            componentTree: traverseTree(state.componentTree, (node) => {
+                if (node.id !== id) return node
+
+                return {
+                    ...node,
+                    ...updates,
+                    style: {
+                        ...node.style,
+                        ...(updates as any).style,
+                    },
+                }
+            }),
+        }))
+    }
 }));
