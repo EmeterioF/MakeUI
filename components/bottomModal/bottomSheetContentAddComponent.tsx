@@ -52,7 +52,7 @@ const firstModal = StyleSheet.create({
     addButtonText: {
         color: '#fff',
         fontSize: 13,
-        fontWeight: '800',
+        fontWeight: '600',
         letterSpacing: 0.5,
     },
 });

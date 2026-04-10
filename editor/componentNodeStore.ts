@@ -28,137 +28,87 @@ export interface ComponentNode {
 
 interface CanvasState {
     componentTree: ComponentNode[];
-
     selectedID: string | null;
-    selectNode: (id: string) => void;
-    selectedNode : ComponentNode | null
 
-    addNode: (componentNode: Omit<ComponentNode, 'id'>) => void;
-    deleteNode: (id: string | null) => void;
-    editNode: (id: string | null, edits: Partial<Omit<ComponentNode, 'id'>>) => void;
+    selectNode: (id: string) => void;
+    addNode: (node: Omit<ComponentNode, 'id'>) => void;
+    deleteNode: (id: string) => void;
+    editNode: (id: string, updates: Partial<Omit<ComponentNode, 'id'>>) => void;
 }
 
 const generateId = () => Math.random().toString(36).slice(2, 9);
 
-// ─── Recursive helpers ────────────────────────────────────────────────────────
+// ─── Simple recursive helper for all operations ────────────────────────────────
+const traverseTree = (
+    nodes: ComponentNode[], // the component tree to be passed
+    callback: (node: ComponentNode) => ComponentNode | null //crud operations that acts as a recursive function to read child
+): ComponentNode[] => {
+    const result: ComponentNode[] = [];
 
-const addChildRecursive = (
-    nodes: ComponentNode[],
-    parentId: string,
-    newNode: ComponentNode
-): ComponentNode[] =>
-    nodes.map(node => {
-        if (node.id === parentId) {
-            return {
-                ...node,
-                children: [...(node.children ?? []), newNode],
-            };
-        }
-        if (node.children?.length) {
-            return {
-                ...node,
-                children: addChildRecursive(node.children, parentId, newNode),
-            };
-        }
-        return node;
-    });
+    for (const node of nodes) {
+        const updated = callback(node);
 
-const deleteNodeRecursive = (
-    nodes: ComponentNode[],
-    id: string
-): ComponentNode[] =>
-    nodes
-        .filter(node => node.id !== id)
-        .map(node => ({
-            ...node,
-            children: node.children
-                ? deleteNodeRecursive(node.children, id)
-                : undefined,
-        }));
+        if (updated === null) continue; // Skip deleted nodes
 
-const editNodeRecursive = (
-    nodes: ComponentNode[],
-    id: string,
-    edits: Partial<Omit<ComponentNode, 'id'>>
-): ComponentNode[] =>
-    nodes.map(node => {
-        if (node.id === id) {
-            return {
-                ...node,
-                ...edits,
-                // Deep-merge style so callers can patch a single style prop
-                style: edits.style
-                    ? { ...node.style, ...edits.style }
-                    : node.style,
-                // Keep children untouched unless explicitly passed in edits
-                children: edits.children ?? node.children,
-            };
-        }
-        if (node.children?.length) {
-            return {
-                ...node,
-                children: editNodeRecursive(node.children, id, edits),
-            };
-        }
-        return node;
-    });
+        const processed: ComponentNode = {
+            ...updated,
+            children: updated.children ? traverseTree(updated.children, callback) : updated.children,
+        };
+
+        result.push(processed);
+    }
+
+    return result;
+};
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 
 export const useComponentNodeStore = create<CanvasState>((set, get) => ({
     componentTree: [],
     selectedID: null,
-    selectedNode: null,
 
     selectNode: (id) => {
-        set(state => ({
-            selectedID: state.selectedID === id ? null : id,
-        }))
-
-        const { selectedID, componentTree} = get();
-        const selectedNode:any = componentTree.filter( (component) => component.id === selectedID)
-
-        set({ selectedNode: selectedNode })
+        set({ selectedID: id });
     },
 
+    addNode: (node) => {
+        const { selectedID, componentTree } = get();
+        const newNode: ComponentNode = { ...node, id: generateId() };
 
-
-    addNode: (componentNode) => {
-        const { selectedID } = get();
-        const newNode: ComponentNode = { ...componentNode, id: generateId() };
-
-        if (selectedID) {
-            // Attach as a child of the selected node
-            set(state => ({
-                componentTree: addChildRecursive(
-                    state.componentTree,
-                    selectedID,
-                    newNode
-                ),
-            }));
-        } else {
-            // No selection → add to the root level
-            set(state => ({
-                componentTree: [...state.componentTree, newNode],
-            }));
+        if (!selectedID) {
+            // Add to root
+            set({ componentTree: [...componentTree, newNode] });
+            return;
         }
+
+        // Add as child to selected node
+        set({
+            componentTree: traverseTree(componentTree, (n) => {
+                if (n.id === selectedID) {
+                    return {
+                        ...n,
+                        children: [...(n.children || []), newNode],
+                    };
+                }
+                return n;
+            }),
+        });
     },
 
     deleteNode: (id) => {
-        if (!id) return;
-
         set(state => ({
-            componentTree: deleteNodeRecursive(state.componentTree, id),
-            // Deselect if the deleted node was selected
+            componentTree: traverseTree(state.componentTree, (node) =>
+                node.id === id ? null : node // Return null to delete
+            ),
             selectedID: state.selectedID === id ? null : state.selectedID,
         }));
     },
 
-    editNode: (id, edits) => {
-        if (!id) return;
-
+    editNode: (id, updates) => {
         set(state => ({
-            componentTree: editNodeRecursive(state.componentTree, id, edits),
+            componentTree: traverseTree(state.componentTree, (node) =>
+                node.id === id ? { ...node, ...updates } : node
+            ),
         }));
     },
 }));

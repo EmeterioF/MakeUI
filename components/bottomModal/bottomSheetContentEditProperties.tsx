@@ -38,37 +38,59 @@ export default  function BottomSheetContentEditProperties({onBack, onDelete}:Pro
 const secondModal = StyleSheet.create({
     actionContainer: {
         flexDirection: 'row',
-        gap: 150,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        marginBottom: 12,
+        gap: 100
     },
+
+    // Group left/right if needed later
+    leftGroup: {
+        flexDirection: 'row',
+    },
+
     button: {
-        flex: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 999, // pill shape
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
     },
+
     buttonSecondary: {
-        backgroundColor: '#e1b85a',
-        borderWidth: 1.5,
+        backgroundColor: '#F2F2F2',
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
     },
+
     buttonDanger: {
-        backgroundColor: '#B00020',
+        backgroundColor: '#FFECEC',
+        borderWidth: 1,
+        borderColor: '#FFB3B3',
     },
+
     buttonPressed: {
-        opacity: 0.75,
+        transform: [{ scale: 0.95 }],
     },
+
     buttonText: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        color: '#fff',
-        textAlign: 'center',
+        fontSize: 13,
+        fontWeight: '500',
+        color: '#333',
     },
+
+    buttonTextDanger: {
+        color: '#D32F2F',
+    },
+
     propertiesLabel: {
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: 13,
+        fontWeight: '600',
+        letterSpacing: 0.5,
         paddingHorizontal: 16,
-        paddingBottom: 12,
-        color: '#1a1a1a',
+        paddingBottom: 8,
+        color: '#888',
     },
 });
