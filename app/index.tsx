@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import ComponentRenderer from "@/renderer/componentRenderer";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import EditBottomSheet from "@/components/editBottomSheet";
+import BottomSheet from "@/components/bottomModal/bottomSheet";
 
 
 export default function Index() {
@@ -24,7 +24,7 @@ export default function Index() {
             </View>
 
             {/* BOTTOM SHEET - PROPERTIES AND ADD COMPONENTS PANEL */}
-            <EditBottomSheet/>
+            <BottomSheet/>
 
         </GestureHandlerRootView>
     );
