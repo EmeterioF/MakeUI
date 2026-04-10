@@ -9,6 +9,8 @@ import {BottomSheetModalProvider} from '@gorhom/bottom-sheet'
 export default function Index() {
     const componentTree = useComponentNodeStore(s => s.componentTree);
 
+
+
     return (
         <GestureHandlerRootView style={styles.container}>
             <BottomSheetModalProvider >

@@ -32,7 +32,7 @@ interface CanvasState {
 
     selectNode: (id: string) => void;
     addNode: (node: Omit<ComponentNode, 'id'>) => void;
-    deleteNode: (id: string) => void;
+    deleteNode: (id: string| null) => void;
     editNode: (id: string, updates: Partial<Omit<ComponentNode, 'id'>>) => void;
 }
 

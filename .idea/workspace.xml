@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="254effca-3266-4261-b3ba-e7d618a59df9" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/components/bottomModal/editProperties.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentAddComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentAddComponent.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentEditProperties.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentEditProperties.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/componentNodeStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/componentNodeStore.ts" afterDir="false" />
     </list>
@@ -18,8 +18,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
@@ -101,7 +101,7 @@
       <workItem from="1775635440792" duration="13194000" />
       <workItem from="1775652037856" duration="144000" />
       <workItem from="1775796297423" duration="948000" />
-      <workItem from="1775808389733" duration="1332000" />
+      <workItem from="1775808389733" duration="5978000" />
     </task>
     <servers />
   </component>
