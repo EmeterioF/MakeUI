@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import { View, StyleSheet } from 'react-native';
-import { BottomSheetModalProvider,BottomSheetModal} from '@gorhom/bottom-sheet';
+import { BottomSheetModal} from '@gorhom/bottom-sheet';
 import { BottomSheetModalComponent } from '@/components/bottomModal/bottomSheetModalComponent';
 import {useComponentNodeStore} from "@/editor/componentNodeStore";
 import BottomSheetContentAddComponent from "@/components/bottomModal/bottomSheetContentAddComponent";
@@ -35,8 +35,7 @@ export default function BottomSheet() {
     const handleDelete = () => deleteNode(selectedID)
 
     return (
-        <BottomSheetModalProvider>
-            <View style={canvas.container}>
+            <View>
                 {/* ADD COMPONENTS MODAL*/}
                 <BottomSheetModalComponent ref={firstModalRef}>
                     <BottomSheetContentAddComponent/>
@@ -50,14 +49,8 @@ export default function BottomSheet() {
                     />
                 </BottomSheetModalComponent>
             </View>
-        </BottomSheetModalProvider>
     );
 }
-
-const canvas = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    text: { fontSize: 18, fontWeight: 'bold' },
-});
 
 
 

@@ -22,7 +22,7 @@ export default function BottomSheetContentAddComponent() {
                     ]}
                     onPress={action}
                 >
-                    <Text style={firstModal.addButtonText}  adjustsFontSizeToFit>
+                    <Text style={firstModal.addButtonText} numberOfLines={1}  >
                         {label}
                     </Text>
                 </Pressable>
@@ -34,27 +34,25 @@ export default function BottomSheetContentAddComponent() {
 const firstModal = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        paddingHorizontal: 12,
-        gap: 8,
+        paddingHorizontal: 16,
+        gap: 12,
     },
     addButton: {
-        flex: 1,
         paddingVertical: 10,
-        paddingHorizontal: 20,
-        backgroundColor: '#6200EE',
-        borderRadius: 4,
-        alignItems: 'center',
-        justifyContent: 'center',
+        paddingHorizontal: 16,
+        borderRadius: 999,
+        backgroundColor: '#1E1E1E',
+        borderWidth: 1,
+        borderColor: '#333',
     },
     addButtonPressed: {
-        backgroundColor: '#3700B3',
-        opacity: 0.9,
+        transform: [{ scale: 0.96 }],
+        backgroundColor: '#5E35B1',
     },
     addButtonText: {
         color: '#fff',
-        fontSize: 12,
-        fontWeight: 'bold',
-        textAlign: 'center',
+        fontSize: 13,
+        fontWeight: '800',
+        letterSpacing: 0.5,
     },
-
-})
+});

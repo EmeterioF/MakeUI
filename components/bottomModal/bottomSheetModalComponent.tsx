@@ -29,6 +29,8 @@ export const BottomSheetModalComponent = forwardRef<BottomSheetModal, BottomShee
                 snapPoints={defaultSnapPoints}
                 enablePanDownToClose={false}
                 enableOverDrag={true}
+                backdropComponent={undefined}
+                containerStyle={{ backgroundColor: 'transparent' }}  // ← this
             >
                 <BottomSheetView style={styles.contentContainer }>
                     {children}
