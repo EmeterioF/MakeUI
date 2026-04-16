@@ -1,20 +1,26 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
-import ComponentRenderer from "@/renderer/componentRenderer";
+import ComponentRenderer from '@/renderer/componentRenderer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet from "@/components/bottomModal/bottomSheet";
-import {BottomSheetModalProvider} from '@gorhom/bottom-sheet'
+import BottomSheet from '@/components/bottomModal/bottomSheet';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 export default function Index() {
-    const componentTree = useComponentNodeStore(s => s.componentTree);
-
-
+    const componentTree = useComponentNodeStore((s) => s.componentTree);
+    const canvasPositionMode = useComponentNodeStore((s) => s.canvasPositionMode);
+    const canvasFlexStyle = useComponentNodeStore((s) => s.canvasFlexStyle);
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            <BottomSheetModalProvider >
-                <View style={styles.canvas}>
+            <BottomSheetModalProvider>
+                <View
+                    style={[
+                        styles.canvas,
+                        canvasPositionMode === 'flow' && styles.canvasFlex,
+                        canvasPositionMode === 'flow' && canvasFlexStyle,
+                    ]}
+                >
                     {componentTree.map((node) => (
                         <ComponentRenderer key={node.id} node={node} />
                     ))}
@@ -29,27 +35,15 @@ export default function Index() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
     },
     canvas: {
-        position: 'relative',   // needed so absolute children position correctly
-        backgroundColor: '#ffffff',
-    },
-    toolbar: {
-        flexDirection: 'row',
-        gap: 8,
-        padding: 8,
-        backgroundColor: '#ffffff',
-    },
-    btn: {
         flex: 1,
-        backgroundColor: '#333',
-        borderRadius: 6,
-        paddingVertical: 10,
-        alignItems: 'center',
+        position: 'relative',
+        backgroundColor: '#ffffff',
     },
-    btnText: {
-        color: '#fff',
-        fontSize: 13,
+    canvasFlex: {
+        flexDirection: 'column',
+        alignItems: 'flex-start',
     },
 });

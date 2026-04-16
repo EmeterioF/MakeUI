@@ -136,7 +136,7 @@ export default function BottomSheetContentEditProperties({ onBack, onDelete }: P
 
     const activeSection = properties.find(p => p.header === selectedHeader)
 
-    const ROOT_KEYS = new Set(['content', 'x', 'y'])
+    const ROOT_KEYS = new Set(['content', 'x', 'y', 'positionMode', 'layoutMode'])
 
     const getValue = (key: string) => {
         if (!selectedNode) return ''
@@ -200,7 +200,9 @@ export default function BottomSheetContentEditProperties({ onBack, onDelete }: P
             </View>
 
             {/* PROPERTY INPUTS */}
-            {activeSection?.styles.map(item => (
+            {activeSection?.styles
+                .filter(item => !(item.key === 'layoutMode' && selectedNode?.type !== 'View'))
+                .map(item => (
                 <View key={item.key} style={secondModal.propertyRow}>
                     <Text style={secondModal.propertyLabel}>{item.label}</Text>
 

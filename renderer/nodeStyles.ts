@@ -27,13 +27,6 @@ const base = StyleSheet.create({
 });
 
 export const getNodeStyle = (node: ComponentNode, isSelected: boolean) => {
-
-    const position: ViewStyle = {
-        position: 'absolute',
-        left: node.x,
-        top: node.y,
-    };
-
     const selection = isSelected ? base.selected : null;
 
     // cast node.style as any because it holds mixed View+Text styles
@@ -41,11 +34,11 @@ export const getNodeStyle = (node: ComponentNode, isSelected: boolean) => {
     const nodeStyle = node.style as any;
 
     return {
-        view:                [position, nodeStyle, selection] as ViewStyle[],
-        text:                [position, nodeStyle, selection] as TextStyle[],
-        button:              [position, nodeStyle, selection] as ViewStyle[],
+        view:                [nodeStyle, selection] as ViewStyle[],
+        text:                [nodeStyle, selection] as TextStyle[],
+        button:              [nodeStyle, selection] as ViewStyle[],
         buttonLabel:         base.buttonLabel,
-        image:               [position, nodeStyle, selection] as ViewStyle[],
+        image:               [nodeStyle, selection] as ViewStyle[],
         imageFill:           base.imageFill,
         imagePlaceholder:    base.imagePlaceholder,
         imagePlaceholderIcon: base.imagePlaceholderIcon,
