@@ -3,28 +3,37 @@ import { ComponentNode } from '@/editor/componentNodeStore';
 
 export const ViewDefault: Omit<ComponentNode, 'id'> = {
     type: 'View',
-    x: 40, y: 40,
-    style: { width: 200, height: 120, backgroundColor: '#e8e8e8', borderColor: '#8d8d8d', borderWidth: 1 },
+    x: 0, y: 0,
+    style: {
+        flex: 1,
+        minHeight: 120,
+        padding: 12,
+        gap: 8,
+        backgroundColor: '#E8E8E8',
+        borderColor: '#8D8D8D',
+        borderWidth: 1,
+        layoutMode: 'flex',
+    },
     children: [],
 };
 
 export const TextDefault: Omit<ComponentNode, 'id'> = {
     type: 'Text',
-    x: 40, y: 40,
-    style: { fontSize: 16, color: '#000' },
+    x: 0, y: 0,
+    style: { fontSize: 16, color: '#000', marginTop: 8, marginLeft: 8 },
     content: 'Text',
 };
 
 export const ButtonDefault: Omit<ComponentNode, 'id'> = {
     type: 'Button',
-    x: 40, y: 40,
-    style: { width: 120, height: 44, backgroundColor: '#6200EE', borderRadius: 8, color: '#fff', fontSize: 14 },
+    x: 0, y: 0,
+    style: { height: 44, paddingLeft: 14, paddingRight: 14, backgroundColor: '#6200EE', borderRadius: 8, color: '#fff', fontSize: 14, marginTop: 8, marginLeft: 8, alignSelf: 'flex-start' },
     content: 'Button',
 };
 
 export const ImageDefault: Omit<ComponentNode, 'id'> = {
     type: 'Image',
-    x: 40, y: 40,
-    style: { width: 160, height: 120, resizeMode: 'cover' },
+    x: 0, y: 0,
+    style: { width: 160, height: 120, resizeMode: 'cover', marginTop: 8, marginLeft: 8 },
     content: '',
 };

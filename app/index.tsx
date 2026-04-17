@@ -8,15 +8,30 @@ import {BottomSheetModalProvider} from '@gorhom/bottom-sheet'
 
 export default function Index() {
     const componentTree = useComponentNodeStore(s => s.componentTree);
-
+    const canvasConfig = useComponentNodeStore(s => s.canvasConfig);
 
 
     return (
         <GestureHandlerRootView style={styles.container}>
             <BottomSheetModalProvider >
-                <View style={styles.canvas}>
+                <View
+                    style={[
+                        styles.canvas,
+                        canvasConfig.layoutMode === 'absolute'
+                            ? styles.canvasAbsolute
+                            : {
+                                flexDirection: canvasConfig.style.flexDirection,
+                                justifyContent: canvasConfig.style.justifyContent,
+                                alignItems: canvasConfig.style.alignItems,
+                                flexWrap: canvasConfig.style.flexWrap,
+                                gap: canvasConfig.style.gap,
+                                padding: canvasConfig.style.padding,
+                                backgroundColor: canvasConfig.style.backgroundColor,
+                            }
+                    ]}
+                >
                     {componentTree.map((node) => (
-                        <ComponentRenderer key={node.id} node={node} />
+                        <ComponentRenderer key={node.id} node={node} parentLayoutMode={canvasConfig.layoutMode} />
                     ))}
                 </View>
 
@@ -32,8 +47,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffffff'
     },
     canvas: {
-        position: 'relative',   // needed so absolute children position correctly
-        backgroundColor: '#ffffff',
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        marginBottom:'20%'//makes room for the bottom-sheet
+    },
+    canvasAbsolute: {
+        position: 'relative',
     },
     toolbar: {
         flexDirection: 'row',

@@ -5,13 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="254effca-3266-4261-b3ba-e7d618a59df9" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/docs/TODO.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/bottomModal/bottomSheet.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/bottomModal/bottomSheet.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentAddComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentAddComponent.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentEditProperties.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentEditProperties.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/bottomModal/bottomSheetModalComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/bottomModal/bottomSheetModalComponent.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/bottomModal/editProperties.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/bottomModal/editProperties.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/componentNodeStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/componentNodeStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/defaultNodes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/defaultNodes.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/renderer/componentRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/renderer/componentRenderer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/renderer/nodeStyles.ts" beforeDir="false" afterPath="$PROJECT_DIR$/renderer/nodeStyles.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,6 +116,8 @@
       <workItem from="1775652037856" duration="144000" />
       <workItem from="1775796297423" duration="948000" />
       <workItem from="1775808389733" duration="5978000" />
+      <workItem from="1776405380037" duration="4540000" />
+      <workItem from="1776410428429" duration="795000" />
     </task>
     <servers />
   </component>

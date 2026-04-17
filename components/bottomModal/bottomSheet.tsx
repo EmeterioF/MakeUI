@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { BottomSheetModal} from '@gorhom/bottom-sheet';
 import { BottomSheetModalComponent } from '@/components/bottomModal/bottomSheetModalComponent';
 import {useComponentNodeStore} from "@/editor/componentNodeStore";
@@ -37,12 +37,12 @@ export default function BottomSheet() {
     return (
             <View>
                 {/* ADD COMPONENTS MODAL*/}
-                <BottomSheetModalComponent ref={firstModalRef}>
+                <BottomSheetModalComponent ref={firstModalRef} index={2}>
                     <BottomSheetContentAddComponent/>
                 </BottomSheetModalComponent>
 
                 {/* PROPERTIES COMPONENTS MODAL*/}
-                <BottomSheetModalComponent ref={secondModalRef} >
+                <BottomSheetModalComponent ref={secondModalRef} index={8}>
                     <BottomSheetContentEditProperties
                         onBack={handleBackToFirstModal}
                         onDelete={handleDelete}

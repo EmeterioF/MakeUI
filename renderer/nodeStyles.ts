@@ -1,10 +1,16 @@
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { ComponentNode } from '@/editor/componentNodeStore';
+import { StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { ComponentNode, LayoutMode } from '@/editor/componentNodeStore';
 
 const base = StyleSheet.create({
     selected: {
         borderWidth: 2,
         borderColor: '#4A90E2',
+    },
+    dropTarget: {
+        borderWidth: 2,
+        borderColor: '#10B981',
+        borderStyle: 'dashed',
+        backgroundColor: 'rgba(16,185,129,0.08)',
     },
     buttonLabel: {
         color: '#fff',
@@ -17,38 +23,42 @@ const base = StyleSheet.create({
     },
     imagePlaceholder: {
         flex: 1,
-        backgroundColor: '#e0e0e0',
+        backgroundColor: '#E0E0E0',
         justifyContent: 'center',
         alignItems: 'center',
     },
     imagePlaceholderIcon: {
-        fontSize: 32,
+        fontSize: 24,
     },
 });
 
-export const getNodeStyle = (node: ComponentNode, isSelected: boolean) => {
-
-    const position: ViewStyle = {
-        position: 'absolute',
-        left: node.x,
-        top: node.y,
-    };
+export const getNodeStyle = (
+    node: ComponentNode,
+    isSelected: boolean,
+    isDropTarget: boolean,
+    parentLayoutMode: LayoutMode
+) => {
+    const position: ViewStyle =
+        parentLayoutMode === 'absolute'
+            ? {
+                  position: 'absolute',
+                  left: node.x,
+                  top: node.y,
+              }
+            : {};
 
     const selection = isSelected ? base.selected : null;
-
-    // cast node.style as any because it holds mixed View+Text styles
-    // TypeScript can't verify it statically, but it works at runtime
-    const nodeStyle = node.style as any;
+    const dropTarget = isDropTarget ? base.dropTarget : null;
+    const nodeStyle = node.style as unknown as ViewStyle & TextStyle;
 
     return {
-        view:                [position, nodeStyle, selection] as ViewStyle[],
-        text:                [position, nodeStyle, selection] as TextStyle[],
-        button:              [position, nodeStyle, selection] as ViewStyle[],
-        buttonLabel:         base.buttonLabel,
-        image:               [position, nodeStyle, selection] as ViewStyle[],
-        imageFill:           base.imageFill,
-        imagePlaceholder:    base.imagePlaceholder,
+        view: [position, nodeStyle, selection, dropTarget] as ViewStyle[],
+        text: [position, nodeStyle, selection] as TextStyle[],
+        button: [{ justifyContent: 'center', alignItems: 'center' }, position, nodeStyle, selection] as ViewStyle[],
+        buttonLabel: [base.buttonLabel, { color: node.style.color ?? '#fff' }] as TextStyle[],
+        image: [position, nodeStyle, selection] as ViewStyle[],
+        imageFill: base.imageFill,
+        imagePlaceholder: base.imagePlaceholder,
         imagePlaceholderIcon: base.imagePlaceholderIcon,
     };
-
 };
