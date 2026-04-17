@@ -30,7 +30,7 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
     const isSelected = selectedID === node.id;
     const isDropTarget = node.type === 'View' && hoveredParentID === node.id;
     const s = getNodeStyle(node, isSelected, isDropTarget, parentLayoutMode);
-    const canDrag = true;
+    const isButton = node.type === 'Button';
 
     const [dragDelta, setDragDelta] = useState({ dx: 0, dy: 0 });
     const rafRef = useRef<number | null>(null);
@@ -52,7 +52,7 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
         }
         pendingRef.current = { dx: 0, dy: 0 };
         dropTargetRef.current = null;
-        longPressReadyRef.current = node.type !== 'Button';
+        longPressReadyRef.current = !isButton;
         setDragDelta({ dx: 0, dy: 0 });
         startRef.current.moved = false;
     };
@@ -71,9 +71,9 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
     };
 
     const dragStyle = useMemo(() => {
-        if (!canDrag || (dragDelta.dx === 0 && dragDelta.dy === 0)) return undefined;
+        if (dragDelta.dx === 0 && dragDelta.dy === 0) return undefined;
         return { transform: [{ translateX: dragDelta.dx }, { translateY: dragDelta.dy }] };
-    }, [canDrag, dragDelta.dx, dragDelta.dy]);
+    }, [dragDelta.dx, dragDelta.dy]);
 
     const isDirectTouchOnNode = (event: GestureResponderEvent) => {
         const nodeHandle = findNodeHandle(layoutRef.current);
@@ -83,14 +83,12 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
 
     const handlers = {
         onStartShouldSetResponder: (event: GestureResponderEvent) => isDirectTouchOnNode(event),
-        onMoveShouldSetResponder: (event: GestureResponderEvent) => canDrag && isDirectTouchOnNode(event),
-        onStartShouldSetResponderCapture: () => false,
-        onMoveShouldSetResponderCapture: () => false,
+        onMoveShouldSetResponder: (event: GestureResponderEvent) => isDirectTouchOnNode(event),
         onResponderGrant: (event: GestureResponderEvent) => {
             clearDropTarget();
             if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
-            longPressReadyRef.current = node.type !== 'Button';
-            if (node.type === 'Button') {
+            longPressReadyRef.current = !isButton;
+            if (isButton) {
                 longPressTimerRef.current = setTimeout(() => {
                     longPressReadyRef.current = true;
                 }, 220);
@@ -104,7 +102,6 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
             };
         },
         onResponderMove: (event: GestureResponderEvent) => {
-            if (!canDrag) return;
             if (!longPressReadyRef.current) return;
             const dx = event.nativeEvent.pageX - startRef.current.pageX;
             const dy = event.nativeEvent.pageY - startRef.current.pageY;
@@ -118,7 +115,6 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
             }
         },
         onResponderRelease: () => {
-            if (!canDrag) return;
             if (!startRef.current.moved) {
                 if (selectedID === node.id) {
                     selectParentNode(node.id);
@@ -189,9 +185,11 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
             return (
                 <View ref={layoutRef} onLayout={reportLayout} {...handlers} style={[s.image, dragStyle as ViewStyle]}>
                     {node.content ? (
-                        <Image source={{ uri: node.content }} style={s.imageFill} />
+                        <View pointerEvents="none" style={s.imageFill}>
+                            <Image source={{ uri: node.content }} style={s.imageFill} />
+                        </View>
                     ) : (
-                        <View style={s.imagePlaceholder}>
+                        <View pointerEvents="none" style={s.imagePlaceholder}>
                             <Text style={s.imagePlaceholderIcon}>IMG</Text>
                         </View>
                     )}
