@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useComponentNodeStore } from '@/editor/componentNodeStore';
+import { useComponentNodeStore} from "@/editor/componentNodeStore";
 import ComponentRenderer from "@/renderer/componentRenderer";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from "@/components/bottomModal/bottomSheet";
@@ -17,21 +17,19 @@ export default function Index() {
                 <View
                     style={[
                         styles.canvas,
-                        canvasConfig.layoutMode === 'absolute'
-                            ? styles.canvasAbsolute
-                            : {
-                                flexDirection: canvasConfig.style.flexDirection,
-                                justifyContent: canvasConfig.style.justifyContent,
-                                alignItems: canvasConfig.style.alignItems,
-                                flexWrap: canvasConfig.style.flexWrap,
-                                gap: canvasConfig.style.gap,
-                                padding: canvasConfig.style.padding,
-                                backgroundColor: canvasConfig.style.backgroundColor,
-                            }
+                        {
+                            flexDirection: canvasConfig.style.flexDirection,
+                            justifyContent: canvasConfig.style.justifyContent,
+                            alignItems: canvasConfig.style.alignItems,
+                            flexWrap: canvasConfig.style.flexWrap,
+                            gap: canvasConfig.style.gap,
+                            padding: canvasConfig.style.padding,
+                            backgroundColor: canvasConfig.style.backgroundColor,
+                        }
                     ]}
                 >
                     {componentTree.map((node) => (
-                        <ComponentRenderer key={node.id} node={node} parentLayoutMode={canvasConfig.layoutMode} />
+                        <ComponentRenderer key={node.id} node={node} />
                     ))}
                 </View>
 
@@ -50,9 +48,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FFFFFF',
         marginBottom:'20%'//makes room for the bottom-sheet
-    },
-    canvasAbsolute: {
-        position: 'relative',
     },
     toolbar: {
         flexDirection: 'row',

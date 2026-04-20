@@ -8,20 +8,17 @@ import {
     ViewStyle,
 } from 'react-native';
 import { getNodeStyle } from '@/renderer/nodeStyles';
-import { ComponentNode, LayoutMode, useComponentNodeStore } from '@/editor/componentNodeStore';
+import { ComponentNode, useComponentNodeStore } from '@/editor/componentNodeStore';
 
 type Props = {
     node: ComponentNode;
-    parentLayoutMode: LayoutMode;
 };
 
-function ComponentRendererBase({ node, parentLayoutMode }: Props) {
+function ComponentRendererBase({ node }: Props) {
     const selectedID = useComponentNodeStore((s) => s.selectedID);
     const hoveredParentID = useComponentNodeStore((s) => s.hoveredParentID);
     const onSelect = useComponentNodeStore((s) => s.selectNode);
     const selectParentNode = useComponentNodeStore((s) => s.selectParentNode);
-    const moveNode = useComponentNodeStore((s) => s.moveNode);
-    const reorderNode = useComponentNodeStore((s) => s.reorderNode);
     const updateNodeLayout = useComponentNodeStore((s) => s.updateNodeLayout);
     const previewDropTarget = useComponentNodeStore((s) => s.previewDropTarget);
     const clearDropTarget = useComponentNodeStore((s) => s.clearDropTarget);
@@ -29,7 +26,7 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
 
     const isSelected = selectedID === node.id;
     const isDropTarget = node.type === 'View' && hoveredParentID === node.id;
-    const s = getNodeStyle(node, isSelected, isDropTarget, parentLayoutMode);
+    const s = getNodeStyle(node, isSelected, isDropTarget);
     const isButton = node.type === 'Button';
 
     const [dragDelta, setDragDelta] = useState({ dx: 0, dy: 0 });
@@ -123,27 +120,8 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
                 }
             } else if (longPressReadyRef.current) {
                 const targetId = dropTargetRef.current;
-                const dropped =
-                    targetId !== null
-                        ? dropNodeIntoParent(node.id, targetId, pendingRef.current.dx, pendingRef.current.dy)
-                        : false;
-
-                if (!dropped && parentLayoutMode === 'absolute') {
-                    const nextX = Math.round(startRef.current.x + pendingRef.current.dx);
-                    const nextY = Math.round(startRef.current.y + pendingRef.current.dy);
-                    moveNode(node.id, nextX, nextY);
-                } else if (!dropped) {
-                    // In flex containers, dragging is intent-based:
-                    // try reorder by one slot; otherwise snap back (no persisted movement).
-                    const threshold = 40;
-                    const primaryAxis = Math.abs(pendingRef.current.dx) > Math.abs(pendingRef.current.dy)
-                        ? pendingRef.current.dx
-                        : pendingRef.current.dy;
-
-                    if (Math.abs(primaryAxis) >= threshold) {
-                        const delta: -1 | 1 = primaryAxis > 0 ? 1 : -1;
-                        reorderNode(node.id, delta);
-                    }
+                if (targetId !== null) {
+                    dropNodeIntoParent(node.id, targetId, pendingRef.current.dx, pendingRef.current.dy);
                 }
             }
             clearDropTarget();
@@ -155,14 +133,12 @@ function ComponentRendererBase({ node, parentLayoutMode }: Props) {
         },
     };
 
-    const childLayoutMode: LayoutMode = node.type === 'View' ? node.style.layoutMode ?? 'flex' : parentLayoutMode;
-
     switch (node.type) {
         case 'View':
             return (
                 <View ref={layoutRef} onLayout={reportLayout} {...handlers} style={[s.view, dragStyle as ViewStyle]}>
                     {node.children?.map((child) => (
-                        <ComponentRenderer key={child.id} node={child} parentLayoutMode={childLayoutMode} />
+                        <ComponentRenderer key={child.id} node={child} />
                     ))}
                 </View>
             );

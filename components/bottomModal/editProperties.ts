@@ -16,9 +16,6 @@ export const properties: PropertySection[] = [
     {
         header: 'Position',
         styles: [
-            { label: 'Layout Mode', key: 'layoutMode', type: 'select', options: ['flex', 'absolute'] },
-            { label: 'X', key: 'x', type: 'number' },
-            { label: 'Y', key: 'y', type: 'number' },
             { label: 'Margin', key: 'margin', type: 'number' },
             { label: 'Margin Top', key: 'marginTop', type: 'number' },
             { label: 'Margin Right', key: 'marginRight', type: 'number' },

@@ -1,13 +1,17 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import { ButtonDefault, ImageDefault, TextDefault, ViewDefault } from '@/editor/defaultNodes';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { SegmentedControl } from '@/components/bottomModal/common/SegmentedControl';
+import { generateSaveAndShareComponentCode } from '@/services/componentCodeShareService';
 
 export default function BottomSheetContentAddComponent() {
     const addNode = useComponentNodeStore((s) => s.addNode);
+    const componentTree = useComponentNodeStore((s) => s.componentTree);
     const canvasConfig = useComponentNodeStore((s) => s.canvasConfig);
     const updateCanvasConfig = useComponentNodeStore((s) => s.updateCanvasConfig);
+    const [isSharing, setIsSharing] = useState(false);
 
     const addButtons = [
         { label: 'VIEW', action: () => addNode(ViewDefault) },
@@ -15,6 +19,19 @@ export default function BottomSheetContentAddComponent() {
         { label: 'BUTTON', action: () => addNode(ButtonDefault) },
         { label: 'IMAGE', action: () => addNode(ImageDefault) },
     ];
+
+    const handleShare = async () => {
+        if (isSharing) return;
+        setIsSharing(true);
+        try {
+            await generateSaveAndShareComponentCode(componentTree, canvasConfig);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unable to share generated code.';
+            Alert.alert('Share failed', message);
+        } finally {
+            setIsSharing(false);
+        }
+    };
 
     return (
         <BottomSheetScrollView style={styles.scroll} contentContainerStyle={styles.container}>
@@ -32,17 +49,18 @@ export default function BottomSheetContentAddComponent() {
                 ))}
             </View>
 
+
+
             <View style={styles.canvasSection}>
                 <Text style={styles.sectionTitle}>Canvas</Text>
-
                 <SegmentedControl
-                    title="Mode"
-                    value={canvasConfig.layoutMode}
+                    title="Direction"
+                    value={canvasConfig.style.flexDirection}
                     options={[
-                        { label: 'Absolute', value: 'absolute' },
-                        { label: 'Flex', value: 'flex' },
+                        { label: 'Row', value: 'row' },
+                        { label: 'Column', value: 'column' },
                     ]}
-                    onChange={(layoutMode) => updateCanvasConfig({ layoutMode })}
+                    onChange={(flexDirection) => updateCanvasConfig({ style: { flexDirection } })}
                     rowStyle={styles.settingRow}
                     labelStyle={styles.settingLabel}
                     containerStyle={styles.segmentedContainer}
@@ -52,63 +70,55 @@ export default function BottomSheetContentAddComponent() {
                     activeTextStyle={styles.segmentedTextActive}
                 />
 
-                {canvasConfig.layoutMode === 'flex' && (
-                    <>
-                        <SegmentedControl
-                            title="Direction"
-                            value={canvasConfig.style.flexDirection}
-                            options={[
-                                { label: 'Row', value: 'row' },
-                                { label: 'Column', value: 'column' },
-                            ]}
-                            onChange={(flexDirection) => updateCanvasConfig({ style: { flexDirection } })}
-                            rowStyle={styles.settingRow}
-                            labelStyle={styles.settingLabel}
-                            containerStyle={styles.segmentedContainer}
-                            itemStyle={styles.segmentedItem}
-                            activeItemStyle={styles.segmentedItemActive}
-                            textStyle={styles.segmentedText}
-                            activeTextStyle={styles.segmentedTextActive}
-                        />
+                <SegmentedControl
+                    title="Wrap"
+                    value={canvasConfig.style.flexWrap}
+                    options={[
+                        { label: 'No Wrap', value: 'nowrap' },
+                        { label: 'Wrap', value: 'wrap' },
+                    ]}
+                    onChange={(flexWrap) => updateCanvasConfig({ style: { flexWrap } })}
+                    rowStyle={styles.settingRow}
+                    labelStyle={styles.settingLabel}
+                    containerStyle={styles.segmentedContainer}
+                    itemStyle={styles.segmentedItem}
+                    activeItemStyle={styles.segmentedItemActive}
+                    textStyle={styles.segmentedText}
+                    activeTextStyle={styles.segmentedTextActive}
+                />
 
-                        <SegmentedControl
-                            title="Wrap"
-                            value={canvasConfig.style.flexWrap}
-                            options={[
-                                { label: 'No Wrap', value: 'nowrap' },
-                                { label: 'Wrap', value: 'wrap' },
-                            ]}
-                            onChange={(flexWrap) => updateCanvasConfig({ style: { flexWrap } })}
-                            rowStyle={styles.settingRow}
-                            labelStyle={styles.settingLabel}
-                            containerStyle={styles.segmentedContainer}
-                            itemStyle={styles.segmentedItem}
-                            activeItemStyle={styles.segmentedItemActive}
-                            textStyle={styles.segmentedText}
-                            activeTextStyle={styles.segmentedTextActive}
-                        />
-
-                        <SegmentedControl
-                            title="Align"
-                            value={canvasConfig.style.alignItems}
-                            options={[
-                                { label: 'Start', value: 'flex-start' },
-                                { label: 'Center', value: 'center' },
-                                { label: 'End', value: 'flex-end' },
-                                { label: 'Stretch', value: 'stretch' },
-                            ]}
-                            onChange={(alignItems) => updateCanvasConfig({ style: { alignItems } })}
-                            rowStyle={styles.settingRow}
-                            labelStyle={styles.settingLabel}
-                            containerStyle={styles.segmentedContainer}
-                            itemStyle={styles.segmentedItem}
-                            activeItemStyle={styles.segmentedItemActive}
-                            textStyle={styles.segmentedText}
-                            activeTextStyle={styles.segmentedTextActive}
-                        />
-                    </>
-                )}
+                <SegmentedControl
+                    title="Align"
+                    value={canvasConfig.style.alignItems}
+                    options={[
+                        { label: 'Start', value: 'flex-start' },
+                        { label: 'Center', value: 'center' },
+                        { label: 'End', value: 'flex-end' },
+                        { label: 'Stretch', value: 'stretch' },
+                    ]}
+                    onChange={(alignItems) => updateCanvasConfig({ style: { alignItems } })}
+                    rowStyle={styles.settingRow}
+                    labelStyle={styles.settingLabel}
+                    containerStyle={styles.segmentedContainer}
+                    itemStyle={styles.segmentedItem}
+                    activeItemStyle={styles.segmentedItemActive}
+                    textStyle={styles.segmentedText}
+                    activeTextStyle={styles.segmentedTextActive}
+                />
             </View>
+
+
+            <Pressable
+                style={({ pressed }) => [
+                    styles.shareButton,
+                    pressed && styles.shareButtonPressed,
+                    isSharing && styles.shareButtonDisabled,
+                ]}
+                onPress={handleShare}
+                disabled={isSharing}
+            >
+                <Text style={styles.shareButtonText}>{isSharing ? 'SHARING...' : 'SHARE RN CODE'}</Text>
+            </Pressable>
         </BottomSheetScrollView>
     );
 }
@@ -147,6 +157,26 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '600',
         letterSpacing: 0.4,
+    },
+    shareButton: {
+        paddingVertical: 12,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#0EA5E9',
+        backgroundColor: '#E0F2FE',
+        alignItems: 'center',
+    },
+    shareButtonPressed: {
+        opacity: 0.85,
+    },
+    shareButtonDisabled: {
+        opacity: 0.65,
+    },
+    shareButtonText: {
+        color: '#075985',
+        fontSize: 12,
+        fontWeight: '700',
+        letterSpacing: 0.6,
     },
     canvasSection: {
         borderWidth: 1,

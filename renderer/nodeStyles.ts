@@ -1,5 +1,5 @@
 import { StyleSheet, TextStyle, ViewStyle } from 'react-native';
-import { ComponentNode, LayoutMode } from '@/editor/componentNodeStore';
+import { ComponentNode } from '@/editor/componentNodeStore';
 
 const base = StyleSheet.create({
     selected: {
@@ -35,28 +35,18 @@ const base = StyleSheet.create({
 export const getNodeStyle = (
     node: ComponentNode,
     isSelected: boolean,
-    isDropTarget: boolean,
-    parentLayoutMode: LayoutMode
+    isDropTarget: boolean
 ) => {
-    const position: ViewStyle =
-        parentLayoutMode === 'absolute'
-            ? {
-                  position: 'absolute',
-                  left: node.x,
-                  top: node.y,
-              }
-            : {};
-
     const selection = isSelected ? base.selected : null;
     const dropTarget = isDropTarget ? base.dropTarget : null;
     const nodeStyle = node.style as unknown as ViewStyle & TextStyle;
 
     return {
-        view: [position, nodeStyle, selection, dropTarget] as ViewStyle[],
-        text: [position, nodeStyle, selection] as TextStyle[],
-        button: [{ justifyContent: 'center', alignItems: 'center' }, position, nodeStyle, selection] as ViewStyle[],
+        view: [nodeStyle, selection, dropTarget] as ViewStyle[],
+        text: [nodeStyle, selection] as TextStyle[],
+        button: [{ justifyContent: 'center', alignItems: 'center' }, nodeStyle, selection] as ViewStyle[],
         buttonLabel: [base.buttonLabel, { color: node.style.color ?? '#fff' }] as TextStyle[],
-        image: [position, nodeStyle, selection] as ViewStyle[],
+        image: [nodeStyle, selection] as ViewStyle[],
         imageFill: base.imageFill,
         imagePlaceholder: base.imagePlaceholder,
         imagePlaceholderIcon: base.imagePlaceholderIcon,
