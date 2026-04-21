@@ -20,13 +20,7 @@ export default function BottomSheetContentEditProperties({ onBack, onDelete }: P
         [selectedHeader]
     );
 
-    if (!selectedNode) {
-        return (
-            <View style={styles.actionContainer}>
-                <Text style={styles.buttonText}>Select a component to edit properties.</Text>
-            </View>
-        );
-    }
+    if (!selectedNode) return null;
 
     return (
         <BottomSheetScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>

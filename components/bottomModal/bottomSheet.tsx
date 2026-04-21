@@ -1,56 +1,57 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
-import { BottomSheetModal} from '@gorhom/bottom-sheet';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { BottomSheetModalComponent } from '@/components/bottomModal/bottomSheetModalComponent';
-import {useComponentNodeStore} from "@/editor/componentNodeStore";
-import BottomSheetContentAddComponent from "@/components/bottomModal/bottomSheetContentAddComponent";
-import BottomSheetContentEditProperties from "@/components/bottomModal/bottomSheetContentEditProperties";
+import { useComponentNodeStore } from '@/editor/componentNodeStore';
+import BottomSheetContentAddComponent from '@/components/bottomModal/bottomSheetContentAddComponent';
+import BottomSheetContentEditProperties from '@/components/bottomModal/bottomSheetContentEditProperties';
 
 export default function BottomSheet() {
-    const firstModalRef = useRef<BottomSheetModal>(null);
-    const secondModalRef = useRef<BottomSheetModal>(null);
+    const addModalRef  = useRef<BottomSheetModal>(null);
+    const editModalRef = useRef<BottomSheetModal>(null);
 
-    //CRUD OPERATIONS
-    const selectedID= useComponentNodeStore(s => s.selectedID);
-    const setSelectedID = useComponentNodeStore.setState
-    const deleteNode= useComponentNodeStore(s => s.deleteNode);
+    const selectedID = useComponentNodeStore(s => s.selectedID);
+    const selectNode = useComponentNodeStore(s => s.selectNode);
+    const deleteNode = useComponentNodeStore(s => s.deleteNode);
 
-    //SHOWS THE ADD NODES ON FIRST RENDER
+    // Show the add modal on first render.
     useEffect(() => {
-        firstModalRef.current?.present();
+        addModalRef.current?.present();
     }, []);
 
+    // When a node is selected → open the edit modal.
+    // When deselected → dismiss the edit modal so its content is never visible
+    // in a half-open state, then bring the add modal back into view.
     useEffect(() => {
-        if(selectedID){
-            secondModalRef.current?.present();
-        }else{
-            firstModalRef.current?.present();
+        if (selectedID) {
+            editModalRef.current?.present();
+        } else {
+            editModalRef.current?.dismiss();
+            addModalRef.current?.present();
         }
-    }, [selectedID])
+    }, [selectedID]);
 
-    const handleBackToFirstModal = () => {
-        firstModalRef.current?.present()
-        setSelectedID({ selectedID: null})
-    }
-    const handleDelete = () => deleteNode(selectedID)
+    // Clear selection and return to the add modal.
+    const handleBack = () => selectNode(null);
+
+    // Delete the selected node (store clears selectedID automatically,
+    // which triggers the useEffect above to switch back to the add modal).
+    const handleDelete = () => deleteNode(selectedID);
 
     return (
-            <View>
-                {/* ADD COMPONENTS MODAL*/}
-                <BottomSheetModalComponent ref={firstModalRef} index={2}>
-                    <BottomSheetContentAddComponent/>
-                </BottomSheetModalComponent>
+        <View>
+            {/* Add components modal — visible when nothing is selected */}
+            <BottomSheetModalComponent ref={addModalRef} index={2}>
+                <BottomSheetContentAddComponent />
+            </BottomSheetModalComponent>
 
-                {/* PROPERTIES COMPONENTS MODAL*/}
-                <BottomSheetModalComponent ref={secondModalRef} index={8}>
-                    <BottomSheetContentEditProperties
-                        onBack={handleBackToFirstModal}
-                        onDelete={handleDelete}
-                    />
-                </BottomSheetModalComponent>
-            </View>
+            {/* Edit properties modal — visible only when a node is selected */}
+            <BottomSheetModalComponent ref={editModalRef} index={8}>
+                <BottomSheetContentEditProperties
+                    onBack={handleBack}
+                    onDelete={handleDelete}
+                />
+            </BottomSheetModalComponent>
+        </View>
     );
 }
-
-
-
