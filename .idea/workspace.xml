@@ -6,17 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="254effca-3266-4261-b3ba-e7d618a59df9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentAddComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/bottomModal/bottomSheetContentAddComponent.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/bottomModal/editProperties.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/bottomModal/editProperties.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/APP_ARCHITECTURE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/TODO.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/TODO.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/TUTORIAL_MAKE_UI.md" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/componentNodeStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/componentNodeStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/renderer/componentRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/renderer/componentRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/renderer/nodeStyles.ts" beforeDir="false" afterPath="$PROJECT_DIR$/renderer/nodeStyles.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/renderer/useDragGesture.ts" beforeDir="false" afterPath="$PROJECT_DIR$/renderer/useGesture.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,6 +55,7 @@
     &quot;ejs.close.delimiter&quot;: &quot;%&gt;&quot;,
     &quot;ejs.open.delimiter&quot;: &quot;&lt;%&quot;,
     &quot;git-widget-placeholder&quot;: &quot;feature/editor-functionalities&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;F:/appDevelopment/MakeUI&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -124,10 +117,18 @@
       <workItem from="1776663808130" duration="9418000" />
       <workItem from="1776678333540" duration="1029000" />
       <workItem from="1776679953633" duration="2568000" />
+      <workItem from="1776752543513" duration="11399000" />
+      <workItem from="1776770546603" duration="2991000" />
+      <workItem from="1777093944397" duration="740000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="dependencySupport" implementationName="javascript:npm:react" />
+    <option featureType="dependencySupport" implementationName="executable:docker" />
+    <option featureType="dependencySupport" implementationName="executable:kubectl" />
   </component>
 </project>

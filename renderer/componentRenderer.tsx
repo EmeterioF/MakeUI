@@ -3,7 +3,7 @@
  *
  * Renders a single ComponentNode and its children recursively.
  *
- * Gesture handling is fully delegated to useDragGesture — this file only
+ * Gesture handling is fully delegated to useGesture — this file only
  * cares about WHAT to render, not HOW gestures work.
  *
  * Structure per node:
@@ -23,7 +23,7 @@ import Animated from 'react-native-reanimated';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { getNodeStyle } from '@/renderer/nodeStyles';
 import { ComponentNode, useComponentNodeStore } from '@/editor/componentNodeStore';
-import { useDragGesture } from '@/renderer/useDragGesture';
+import { useGesture } from '@/renderer/useGesture';
 
 type Props = {
     node: ComponentNode;
@@ -41,7 +41,7 @@ function ComponentRendererBase({ node }: Props) {
     const s = getNodeStyle(node, isSelected, isDropTarget);
 
     // ── Gesture + animation (all logic lives in this hook) ───────────────────
-    const { gesture, animatedStyle, layoutRef, reportLayout } = useDragGesture(node);
+    const { gesture, animatedStyle, layoutRef, reportLayout } = useGesture(node);
 
     // ── Render ───────────────────────────────────────────────────────────────
     //
@@ -113,3 +113,18 @@ function ComponentRendererBase({ node }: Props) {
 
 const ComponentRenderer = memo(ComponentRendererBase);
 export default ComponentRenderer;
+
+
+/* TLDR;
+*   when the component first renders it will trigger the onLayout property and do the reportLayout function
+*   reportLayout() = this saves the x and y as well as width and height of the component to the layoutBounds
+*
+*   layoutBounds is an array of objects in which all of the components coordinates are mapped. this is done to be
+*   used when detecting the most suitable parent when dragging a component
+*
+*   next thing that will happen is when a user triggers an gesture event. the gesture logic will be used
+*   by the gesture detector to receive gesture and on what to do on that gesture. you can the logic on
+*   use useGesture.ts
+*   <GestureDetector gesture={gesture}>
+*
+* */

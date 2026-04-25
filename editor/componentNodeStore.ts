@@ -145,6 +145,8 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
         const movingNode = findNode(componentTree, id);
         if (!movingNode) return null;
         const excludedIds = collectDescendantIds(movingNode);
+
+        //this is the one that finds the suitable target
         const targetId = findViewTargetAtPoint(componentTree, layoutBounds, pageX, pageY, excludedIds);
         if (get().hoveredParentID !== targetId) {
             set({ hoveredParentID: targetId });
