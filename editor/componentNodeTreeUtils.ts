@@ -50,6 +50,8 @@ export const findParentAndIndex = (
 //------------------------ ADD NODE UTILS ---------------------//
 
 export const addNodeToCanvas = (node: ComponentNode, parentLayoutMode: LayoutMode): ComponentNode => {
+    // Only container nodes need layout normalization when they enter a canvas/View.
+    // Leaf nodes (Text, Button, Image) can be reused as-is.
     if (node.type !== 'View') return node;
 
     return {
@@ -162,12 +164,17 @@ export const updateTreeById = (
 
 
 export const collectDescendantIds = (node: ComponentNode, ids = new Set<string>()): Set<string> => {
+    // The returned set includes the node itself on purpose.
+    // Drag logic uses this to block dropping into the dragged node or any nested child.
     ids.add(node.id);
     node.children?.forEach((child) => collectDescendantIds(child, ids));
     return ids;
 };
 
 export const extractNodeById = (nodes: ComponentNode[], id: string): [ComponentNode[], ComponentNode | null, boolean] => {
+    // This is the "move" companion to deleteTreeById:
+    // it removes the target from the tree but also returns the removed node
+    // so callers can insert it somewhere else.
     let changed = false;
     let extracted: ComponentNode | null = null;
     const nextNodes: ComponentNode[] = [];

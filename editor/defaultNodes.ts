@@ -6,7 +6,6 @@ export const ViewDefault: Omit<ComponentNode, 'id'> = {
     x: 0, y: 0,
     style: {
         flex: 1,
-        minHeight: 120,
         padding: 12,
         gap: 8,
         backgroundColor: '#E8E8E8',

@@ -144,9 +144,14 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
         const { componentTree, layoutBounds } = get();
         const movingNode = findNode(componentTree, id);
         if (!movingNode) return null;
+
+        // Exclude the dragged node and everything under it.
+        // Without this, a node could be dropped into itself or one of its children,
+        // which would create a cycle in the tree.
         const excludedIds = collectDescendantIds(movingNode);
 
-        //this is the one that finds the suitable target
+        // Hit-test the finger against the latest measured rectangles and choose
+        // the deepest matching View so nested containers win over outer wrappers.
         const targetId = findViewTargetAtPoint(componentTree, layoutBounds, pageX, pageY, excludedIds);
         if (get().hoveredParentID !== targetId) {
             set({ hoveredParentID: targetId });
@@ -167,23 +172,31 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
     dropNodeIntoParent: (id, parentId, _dx, _dy) => {
         const { componentTree } = get();
 
+        // 1) Resolve both sides of the move from the current tree snapshot.
         const movingNode = findNode(componentTree, id);
         const parentNodeCandidate = findNode(componentTree, parentId);
         if (!movingNode || !parentNodeCandidate || parentNodeCandidate.type !== 'View') return false;
+
+        // 2) Extra safety: never allow a node to become a child of its own subtree.
         if (findNode([movingNode], parentId)) return false;
 
+        // 3) No-op if the node is already inside this parent.
         const currentParent = findParentId(componentTree, id);
         if (currentParent === parentId) return false;
 
+        // 4) Remove the node from its old branch first so we can reinsert it cleanly.
         const [treeWithoutNode, extractedNode, changed] = extractNodeById(componentTree, id);
         if (!changed || !extractedNode) return false;
 
+        // 5) Re-read the target parent from the updated tree after extraction.
         const parentAfter = findNode(treeWithoutNode, parentId);
         if (!parentAfter || parentAfter.type !== 'View') return false;
 
+        // 6) Normalize style defaults for the new container's layout rules.
         const parentLayoutMode = parentAfter.style.layoutMode ?? 'flex';
         const adjustedNode = addNodeToCanvas(extractedNode, parentLayoutMode);
 
+        // 7) Append and commit the new tree in one store update.
         const [nextTree, appended] = appendChildToView(treeWithoutNode, parentId, adjustedNode);
         if (!appended) return false;
 

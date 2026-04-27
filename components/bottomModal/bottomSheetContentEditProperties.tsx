@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { properties } from '@/components/bottomModal/editProperties';
+import { getPropertiesForComponent } from '@/components/bottomModal/editProperties';
 import { editPropsStyles as styles } from '@/components/bottomModal/editProperties/styles';
 import { usePropertyEditor } from '@/components/bottomModal/editProperties/usePropertyEditor';
 import { PropertyFieldInput } from '@/components/bottomModal/editProperties/PropertyFieldInput';
@@ -12,12 +12,25 @@ type Props = {
 };
 
 export default function BottomSheetContentEditProperties({ onBack, onDelete }: Props) {
-    const [selectedHeader, setSelectedHeader] = useState(properties[0]?.header ?? 'Layout');
+    const [selectedHeader, setSelectedHeader] = useState('Layout');
     const { selectedNode, getValue, handleChange, stepValue } = usePropertyEditor();
 
+    const visibleProperties = useMemo(
+        () => (selectedNode ? getPropertiesForComponent(selectedNode.type) : []),
+        [selectedNode]
+    );
+
+    useEffect(() => {
+        if (!visibleProperties.length) return;
+        const hasSelectedHeader = visibleProperties.some((section) => section.header === selectedHeader);
+        if (!hasSelectedHeader) {
+            setSelectedHeader(visibleProperties[0].header);
+        }
+    }, [visibleProperties, selectedHeader]);
+
     const activeSection = useMemo(
-        () => properties.find((section) => section.header === selectedHeader),
-        [selectedHeader]
+        () => visibleProperties.find((section) => section.header === selectedHeader),
+        [visibleProperties, selectedHeader]
     );
 
     if (!selectedNode) return null;
@@ -34,7 +47,7 @@ export default function BottomSheetContentEditProperties({ onBack, onDelete }: P
             </View>
 
             <View style={styles.headerTabs}>
-                {properties.map((section) => (
+                {visibleProperties.map((section) => (
                     <Pressable
                         key={section.header}
                         onPress={() => setSelectedHeader(section.header)}

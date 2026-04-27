@@ -30,6 +30,11 @@ type Props = {
 };
 
 function ComponentRendererBase({ node }: Props) {
+    // Every node goes through the same wrapper pipeline:
+    // GestureDetector catches taps/long-press drags,
+    // Animated.View applies temporary drag movement,
+    // and the inner native view reports its real screen bounds.
+
     // ── Selection / hover state from store ───────────────────────────────────
     const selectedID     = useComponentNodeStore(s => s.selectedID);
     const hoveredParentID = useComponentNodeStore(s => s.hoveredParentID);
@@ -57,6 +62,7 @@ function ComponentRendererBase({ node }: Props) {
                 <GestureDetector gesture={gesture}>
                     {/* s.view is ViewStyle[] — spread it alongside animatedStyle */}
                     <Animated.View style={[...s.view, animatedStyle]}>
+                        {/* This inner View is the box we measure for drop hit-testing. */}
                         <View ref={layoutRef} onLayout={reportLayout} style={{ flex: 1 }}>
                             {node.children?.map(child => (
                                 <ComponentRenderer key={child.id} node={child} />
@@ -127,4 +133,9 @@ export default ComponentRenderer;
 *   use useGesture.ts
 *   <GestureDetector gesture={gesture}>
 *
+*   drag-and-drop data flow:
+*   1. reportLayout stores absolute bounds for each node in the zustand store
+*   2. useGesture.ts updates drag translation and calls previewDropTarget(...)
+*   3. previewDropTarget(...) checks layoutBounds to find the deepest valid View
+*   4. dropNodeIntoParent(...) removes the node from the old branch and appends it to the new parent
 * */

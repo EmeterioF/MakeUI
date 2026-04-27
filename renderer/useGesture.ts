@@ -34,8 +34,14 @@
     const LONG_PRESS_NORMAL = 200;  // Views, Text, Image
     const LONG_PRESS_BUTTON = 300;  // Buttons need more time so quick taps don't drag.
 
-    export function useGesture(node: ComponentNode) {
-        // ── Store actions ────────────────────────────────────────────────────────
+export function useGesture(node: ComponentNode) {
+    // This hook is the "runtime controller" for one rendered node:
+    // 1) measure its screen bounds for hit-testing
+    // 2) translate it visually while dragging
+    // 3) ask the store for a preview target under the finger
+    // 4) commit the drop when the gesture ends
+
+    // ── Store actions ────────────────────────────────────────────────────────
         const selectedID         = useComponentNodeStore(s => s.selectedID);
         const selectNode         = useComponentNodeStore(s => s.selectNode);
         const selectParentNode   = useComponentNodeStore(s => s.selectParentNode);
@@ -56,6 +62,8 @@
         const layoutRef = useRef<any>(null);
 
         const reportLayout = () => {
+            // measureInWindow gives absolute screen coordinates, which is important
+            // because drag events also report absolute finger coordinates.
             layoutRef.current?.measureInWindow((x: number, y: number, w: number, h: number) => {
                 updateNodeLayout(node.id, { x, y, width: w, height: h });
             });
@@ -95,7 +103,9 @@
                 translateX.value = event.translationX;
                 translateY.value = event.translationY;
 
-                // Highlight the drop target under the finger.
+                // Ask the store which View currently contains the finger.
+                // The returned id is cached locally so onEnd does not need to
+                // recalculate the drop target from scratch.
                 dropTargetRef.current = previewDropTarget(node.id, event.absoluteX, event.absoluteY);
             })
             .onEnd(event => {

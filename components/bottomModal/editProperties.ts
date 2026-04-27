@@ -1,3 +1,5 @@
+import { ComponentType } from '@/editor/componentNodeTypes';
+
 export type PropertyFieldType = 'number' | 'color' | 'select' | 'text';
 
 export type PropertyField = {
@@ -82,3 +84,15 @@ export const properties: PropertySection[] = [
         ]
     }
 ];
+
+const PROPERTY_SECTIONS_BY_COMPONENT: Record<ComponentType, PropertySection['header'][]> = {
+    View: ['Position', 'Layout', 'Border', 'Background'],
+    Text: ['Position', 'Layout', 'Border', 'Background', 'Text'],
+    Button: ['Position', 'Layout', 'Border', 'Background', 'Text'],
+    Image: ['Position', 'Layout', 'Border', 'Background', 'Image'],
+};
+
+export function getPropertiesForComponent(type: ComponentType): PropertySection[] {
+    const allowedHeaders = new Set(PROPERTY_SECTIONS_BY_COMPONENT[type]);
+    return properties.filter((section) => allowedHeaders.has(section.header));
+}

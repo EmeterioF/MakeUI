@@ -71,6 +71,8 @@ export interface CanvasState {
     componentTree: ComponentNode[];
     selectedID: string | null;
     hoveredParentID: string | null;
+    // Absolute on-screen rectangles keyed by node id.
+    // Drag preview uses these measurements to decide which View is under the finger.
     layoutBounds: Record<string, Rect>;
     canvasConfig: CanvasConfig;
 
@@ -80,8 +82,10 @@ export interface CanvasState {
     deleteNode: (id: string | null) => void;
     editNode: (id: string, updates: Partial<Omit<ComponentNode, 'id'>>) => void;
     updateNodeLayout: (id: string, rect: Rect) => void;
+    // Returns the best candidate parent under the pointer during a drag.
     previewDropTarget: (id: string, pageX: number, pageY: number) => string | null;
     clearDropTarget: () => void;
+    // Moves an existing node into a different View parent.
     dropNodeIntoParent: (id: string, parentId: string, dx: number, dy: number) => boolean;
     updateCanvasConfig: (updates: { layoutMode?: LayoutMode; style?: Partial<CanvasConfig['style']> }) => void;
 }

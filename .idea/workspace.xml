@@ -6,9 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="254effca-3266-4261-b3ba-e7d618a59df9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/componentNodeDropUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/componentNodeDropUtils.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/editor/componentNodeStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/componentNodeStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/componentNodeTreeUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/componentNodeTreeUtils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/componentNodeTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/componentNodeTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/editor/defaultNodes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/editor/defaultNodes.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/renderer/componentRenderer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/renderer/componentRenderer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/renderer/useDragGesture.ts" beforeDir="false" afterPath="$PROJECT_DIR$/renderer/useGesture.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/renderer/useGesture.ts" beforeDir="false" afterPath="$PROJECT_DIR$/renderer/useGesture.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
