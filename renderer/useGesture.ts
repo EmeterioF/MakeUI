@@ -109,20 +109,24 @@ export function useGesture(node: ComponentNode) {
                 dropTargetRef.current = previewDropTarget(node.id, event.absoluteX, event.absoluteY);
             })
             .onEnd(event => {
-                // Snap back. If the drop succeeded the store re-renders the node
-                // in its new parent, making the snap-back invisible.
-                translateX.value = withTiming(0, { duration: 150 });
-                translateY.value = withTiming(0, { duration: 150 });
-
                 const target = dropTargetRef.current;
+
+                // 1) Commit the drop if we ended over a valid parent.
                 if (target !== null) {
                     dropNodeIntoParent(node.id, target, event.translationX, event.translationY);
                 }
+
+                // 2) Clear temporary drag/drop state.
                 clearDropTarget();
                 dropTargetRef.current = null;
 
-                // Always select the node after a drag so the user can immediately
-                // edit whatever they just moved.
+                // 3) Reset the temporary visual translation.
+                // If reparenting succeeded, the node will re-render in its new parent,
+                // so this animation is effectively just cleanup.
+                translateX.value = withTiming(0, { duration: 150 });
+                translateY.value = withTiming(0, { duration: 150 });
+
+                // Keep the moved node selected for immediate editing.
                 selectNode(node.id);
             })
             .onFinalize(() => {
