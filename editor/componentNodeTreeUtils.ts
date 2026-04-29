@@ -142,17 +142,18 @@ export const updateTreeById = (
             return updatedNode;
         }
 
-        // Step 2) Leaf and not target => keep original reference.
+        // Step 2) if the current node does not have a children then just return and do nothing
         if (!node.children?.length) return node;
 
-        // Step 3) Recurse into subtree.
+        // Step 3) if the current node have a child recurse or map the function again to see if the target id is in the child
         const [nextChildren, childChanged] = updateTreeById(node.children, id, updater);
         if (!childChanged) return node;
 
-        // Step 4) Child changed => clone parent with replaced children.
+        // Step 4) childChanged means that the targetId is in the parent if its true then add the updated child to the currentNode => clone parent with replaced children.
         changed = true;
         return { ...node, children: nextChildren };
     });
+
 
     // Step 5) Return original top-level array when nothing changed.
     return [changed ? nextNodes : nodes, changed];

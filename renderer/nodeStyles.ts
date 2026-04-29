@@ -5,11 +5,13 @@ const base = StyleSheet.create({
     selected: {
         borderWidth: 2,
         borderColor: '#4A90E2',
+        borderStyle: 'dashed',
+
     },
     dropTarget: {
         borderWidth: 2,
         borderColor: '#10B981',
-        borderStyle: 'dashed',
+        // borderStyle: 'dashed', used for figma like appearance of a parent
         backgroundColor: 'rgba(16,185,129,0.08)',
     },
     buttonLabel: {

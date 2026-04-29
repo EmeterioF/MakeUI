@@ -177,12 +177,16 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
         const parentNodeCandidate = findNode(componentTree, parentId);
         if (!movingNode || !parentNodeCandidate || parentNodeCandidate.type !== 'View') return false;
 
+        //------------ FALLBACKS
+
         // 2) Extra safety: never allow a node to become a child of its own subtree.
         if (findNode([movingNode], parentId)) return false;
 
         // 3) No-op if the node is already inside this parent.
         const currentParent = findParentId(componentTree, id);
         if (currentParent === parentId) return false;
+
+        //-------------TREE REPARENTING HAPPENS HERE
 
         // 4) Remove the node from its old branch first so we can reinsert it cleanly.
         const [treeWithoutNode, extractedNode, changed] = extractNodeById(componentTree, id);
@@ -192,7 +196,7 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
         const parentAfter = findNode(treeWithoutNode, parentId);
         if (!parentAfter || parentAfter.type !== 'View') return false;
 
-        // 6) Normalize style defaults for the new container's layout rules.
+        // 6) Normalize style defaults for the new container's layout rules. it is to ensure that view always is flex
         const parentLayoutMode = parentAfter.style.layoutMode ?? 'flex';
         const adjustedNode = addNodeToCanvas(extractedNode, parentLayoutMode);
 
