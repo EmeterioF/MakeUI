@@ -1,17 +1,18 @@
-import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import { ButtonDefault, ImageDefault, TextDefault, ViewDefault } from '@/editor/defaultNodes';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { SegmentedControl } from '@/components/bottomModal/common/SegmentedControl';
-import { generateSaveAndShareComponentCode } from '@/services/componentCodeShareService';
+import { useEditorFileActions } from '@/components/editor/useEditorFileActions';
 
-export default function BottomSheetContentAddComponent() {
+type Props = {
+    onOpenCanvasSettings: () => void;
+};
+
+export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }: Props) {
     const addNode = useComponentNodeStore((s) => s.addNode);
-    const componentTree = useComponentNodeStore((s) => s.componentTree);
-    const canvasConfig = useComponentNodeStore((s) => s.canvasConfig);
-    const updateCanvasConfig = useComponentNodeStore((s) => s.updateCanvasConfig);
-    const [isSharing, setIsSharing] = useState(false);
+    const currentFileName = useComponentNodeStore((s) => s.currentFileName);
+    const setCurrentFileName = useComponentNodeStore((s) => s.setCurrentFileName);
+    const { isSaving, saveCurrentFile, saveAndGoHome, saveAndShare } = useEditorFileActions();
 
     const addButtons = [
         { label: 'VIEW', action: () => addNode(ViewDefault) },
@@ -20,105 +21,73 @@ export default function BottomSheetContentAddComponent() {
         { label: 'IMAGE', action: () => addNode(ImageDefault) },
     ];
 
-    const handleShare = async () => {
-        if (isSharing) return;
-        setIsSharing(true);
-        try {
-            await generateSaveAndShareComponentCode(componentTree, canvasConfig);
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Unable to share generated code.';
-            Alert.alert('Share failed', message);
-        } finally {
-            setIsSharing(false);
-        }
-    };
-
     return (
         <BottomSheetScrollView style={styles.scroll} contentContainerStyle={styles.container}>
-            <View style={styles.buttonRow}>
-                {addButtons.map(({ label, action }) => (
-                    <Pressable
-                        key={label}
-                        style={({ pressed }) => [styles.addButton, pressed && styles.addButtonPressed]}
-                        onPress={action}
-                    >
-                        <Text style={styles.addButtonText} numberOfLines={1}>
-                            {label}
-                        </Text>
-                    </Pressable>
-                ))}
+
+            <View style={styles.addSection}>
+                <Text style={styles.sectionTitle}>Add Component</Text>
+                <View style={styles.buttonRow}>
+                    {addButtons.map(({ label, action }) => (
+                        <Pressable
+                            key={label}
+                            style={({ pressed }) => [styles.addButton, pressed && styles.buttonPressed]}
+                            onPress={action}
+                        >
+                            <Text style={styles.addButtonText} numberOfLines={1}>
+                                {label}
+                            </Text>
+                        </Pressable>
+                    ))}
+                </View>
             </View>
+            <View style={styles.hr} />
 
+            <View style={styles.fileRow}>
+                <Pressable
+                    style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
+                    onPress={saveAndGoHome}
+                    disabled={isSaving}
+                >
+                    <Text style={styles.backButtonText}>BACK</Text>
+                </Pressable>
 
-
-            <View style={styles.canvasSection}>
-                <Text style={styles.sectionTitle}>Canvas</Text>
-                <SegmentedControl
-                    title="Direction"
-                    value={canvasConfig.style.flexDirection}
-                    options={[
-                        { label: 'Row', value: 'row' },
-                        { label: 'Column', value: 'column' },
-                    ]}
-                    onChange={(flexDirection) => updateCanvasConfig({ style: { flexDirection } })}
-                    rowStyle={styles.settingRow}
-                    labelStyle={styles.settingLabel}
-                    containerStyle={styles.segmentedContainer}
-                    itemStyle={styles.segmentedItem}
-                    activeItemStyle={styles.segmentedItemActive}
-                    textStyle={styles.segmentedText}
-                    activeTextStyle={styles.segmentedTextActive}
-                />
-
-                <SegmentedControl
-                    title="Wrap"
-                    value={canvasConfig.style.flexWrap}
-                    options={[
-                        { label: 'No Wrap', value: 'nowrap' },
-                        { label: 'Wrap', value: 'wrap' },
-                    ]}
-                    onChange={(flexWrap) => updateCanvasConfig({ style: { flexWrap } })}
-                    rowStyle={styles.settingRow}
-                    labelStyle={styles.settingLabel}
-                    containerStyle={styles.segmentedContainer}
-                    itemStyle={styles.segmentedItem}
-                    activeItemStyle={styles.segmentedItemActive}
-                    textStyle={styles.segmentedText}
-                    activeTextStyle={styles.segmentedTextActive}
-                />
-
-                <SegmentedControl
-                    title="Align"
-                    value={canvasConfig.style.alignItems}
-                    options={[
-                        { label: 'Start', value: 'flex-start' },
-                        { label: 'Center', value: 'center' },
-                        { label: 'End', value: 'flex-end' },
-                        { label: 'Stretch', value: 'stretch' },
-                    ]}
-                    onChange={(alignItems) => updateCanvasConfig({ style: { alignItems } })}
-                    rowStyle={styles.settingRow}
-                    labelStyle={styles.settingLabel}
-                    containerStyle={styles.segmentedContainer}
-                    itemStyle={styles.segmentedItem}
-                    activeItemStyle={styles.segmentedItemActive}
-                    textStyle={styles.segmentedText}
-                    activeTextStyle={styles.segmentedTextActive}
+                <TextInput
+                    value={currentFileName}
+                    onChangeText={setCurrentFileName}
+                    placeholder="File name"
+                    placeholderTextColor="#9CA3AF"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    style={styles.fileNameInput}
                 />
             </View>
 
+            <View style={styles.utilityRow}>
 
-            <Pressable
-                style={({ pressed }) => [
-                    styles.shareButton,
-                    pressed && styles.shareButtonPressed,
-                    isSharing && styles.shareButtonDisabled,
-                ]}
-                onPress={handleShare}
-                disabled={isSharing}
-            >
-                <Text style={styles.shareButtonText}>{isSharing ? 'SHARING...' : 'SHARE RN CODE'}</Text>
-            </Pressable>
+                <Pressable
+                    style={({ pressed }) => [styles.canvasButton, pressed && styles.buttonPressed]}
+                    onPress={onOpenCanvasSettings}
+                >
+                    <Text style={styles.canvasButtonText}>CANVAS SETTINGS</Text>
+                </Pressable>
+
+                <Pressable
+                    style={({ pressed }) => [styles.saveButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
+                    onPress={saveCurrentFile}
+                    disabled={isSaving}
+                >
+                    <Text style={styles.saveButtonText}>{isSaving ? 'SAVING' : 'SAVE'}</Text>
+                </Pressable>
+
+                <Pressable
+                    style={({ pressed }) => [styles.shareButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
+                    onPress={saveAndShare}
+                    disabled={isSaving}
+                >
+                    <Text style={styles.shareButtonText}>SHARE</Text>
+                </Pressable>
+
+            </View>
         </BottomSheetScrollView>
     );
 }
@@ -134,94 +103,133 @@ const styles = StyleSheet.create({
         paddingBottom: 12,
         gap: 14,
     },
-    buttonRow: {
+    fileRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    utilityRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 10,
-        justifyContent: 'center'
     },
-    addButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 14,
-        borderRadius: 999,
-        backgroundColor: '#111827',
-        borderWidth: 1,
-        borderColor: '#111827',
-    },
-    addButtonPressed: {
-        opacity: 0.85,
-        transform: [{ scale: 0.97 }],
-    },
-    addButtonText: {
-        color: '#FFFFFF',
-        fontSize: 12,
-        fontWeight: '600',
-        letterSpacing: 0.4,
-    },
-    shareButton: {
-        paddingVertical: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#0EA5E9',
-        backgroundColor: '#E0F2FE',
-        alignItems: 'center',
-    },
-    shareButtonPressed: {
-        opacity: 0.85,
-    },
-    shareButtonDisabled: {
-        opacity: 0.65,
-    },
-    shareButtonText: {
-        color: '#075985',
-        fontSize: 12,
-        fontWeight: '700',
-        letterSpacing: 0.6,
-    },
-    canvasSection: {
+    fileNameInput: {
+        flex: 1,
+        minWidth: 0,
+        minHeight: 40,
+        paddingHorizontal: 12,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: '#E5E7EB',
-        borderRadius: 10,
-        padding: 12,
-        gap: 10,
+        color: '#111827',
+        fontSize: 14,
+        fontWeight: '600',
         backgroundColor: '#FFFFFF',
+    },
+    saveButton: {
+        minHeight: 40,
+        minWidth: 86,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#86EFAC',
+        backgroundColor: '#DCFCE7',
+        paddingHorizontal: 14,
+    },
+    saveButtonText: {
+        color: '#166534',
+        fontSize: 11,
+        fontWeight: '800',
+    },
+    backButton: {
+        minHeight: 40,
+        minWidth: 76,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#C4B5FD',
+        backgroundColor: '#EDE9FE',
+        paddingHorizontal: 12,
+    },
+    backButtonText: {
+        color: '#5B21B6',
+        fontSize: 11,
+        fontWeight: '800',
+    },
+    canvasButton: {
+        minHeight: 40,
+        minWidth: 76,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#FDBA74',
+        backgroundColor: '#FFEDD5',
+        paddingHorizontal: 12,
+    },
+    canvasButtonText: {
+        color: '#9A3412',
+        fontSize: 11,
+        fontWeight: '800',
+    },
+    shareButton: {
+        minHeight: 40,
+        minWidth: 76,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#93C5FD',
+        backgroundColor: '#DBEAFE',
+        paddingHorizontal: 12,
+    },
+    shareButtonText: {
+        color: '#1D4ED8',
+        fontSize: 11,
+        fontWeight: '800',
+    },
+    addSection: {
+        gap: 10,
     },
     sectionTitle: {
         fontSize: 13,
         fontWeight: '700',
         color: '#111827',
     },
-    settingRow: {
-        gap: 6,
-    },
-    settingLabel: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#4B5563',
-    },
-    segmentedContainer: {
+    buttonRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 8,
+        gap: 10,
     },
-    segmentedItem: {
-        paddingVertical: 6,
-        paddingHorizontal: 10,
-        borderRadius: 999,
-        backgroundColor: '#F3F4F6',
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-    },
-    segmentedItemActive: {
+    addButton: {
+        minHeight: 40,
+        minWidth: 72,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 8,
         backgroundColor: '#111827',
+        borderWidth: 1,
         borderColor: '#111827',
     },
-    segmentedText: {
-        color: '#374151',
-        fontSize: 11,
-        fontWeight: '600',
+    buttonPressed: {
+        opacity: 0.85,
+        transform: [{ scale: 0.97 }],
     },
-    segmentedTextActive: {
+    addButtonText: {
         color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+    disabled: {
+        opacity: 0.6,
+    },
+    hr: {
+        borderBottomColor: 'gray',
+        borderBottomWidth: StyleSheet.hairlineWidth, // Creates a thin line based on screen density
+        marginVertical: 10,
     },
 });

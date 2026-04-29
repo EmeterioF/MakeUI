@@ -68,6 +68,8 @@ export interface CanvasConfig {
 }
 
 export interface CanvasState {
+    currentFileId: number | null;
+    currentFileName: string;
     componentTree: ComponentNode[];
     selectedID: string | null;
     hoveredParentID: string | null;
@@ -76,6 +78,15 @@ export interface CanvasState {
     layoutBounds: Record<string, Rect>;
     canvasConfig: CanvasConfig;
 
+    setCurrentFileName: (fileName: string) => void;
+    startNewFile: () => void;
+    loadFile: (file: {
+        id: number;
+        fileName: string;
+        componentTree: ComponentNode[];
+        canvasConfig: CanvasConfig;
+    }) => void;
+    markFileSaved: (id: number, fileName: string) => void;
     selectNode: (id: string | null) => void;
     selectParentNode: (id: string) => void;
     addNode: (node: Omit<ComponentNode, 'id'>) => void;

@@ -1,1 +1,3 @@
-Document how the drag system works
+1. needs safearea view for the editor as well so i propose to have safe area view wrap the app
+2. the top header of the editor should not exist in the top, it should be part of the bottom-sheet perhaps make the bottom sheet @bottomSheetContentAddComponent have a button for canvas settings that would open a new bottomSheet and a home button as well as share button when share button in editor is tapped it should also trigger the save 
+3. also the home button on the editor should also trigger a save of the file
