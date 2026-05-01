@@ -154,7 +154,6 @@ export const updateTreeById = (
         return { ...node, children: nextChildren };
     });
 
-
     // Step 5) Return original top-level array when nothing changed.
     return [changed ? nextNodes : nodes, changed];
 };

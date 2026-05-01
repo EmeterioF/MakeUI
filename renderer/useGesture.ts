@@ -32,7 +32,7 @@
 
     // How long (ms) the finger must be held before a drag begins.
     const LONG_PRESS_NORMAL = 200;  // Views, Text, Image
-    const LONG_PRESS_BUTTON = 300;  // Buttons need more time so quick taps don't drag.
+    const LONG_PRESS_BUTTON = 250;  // Buttons need more time so quick taps don't drag.
 
 export function useGesture(node: ComponentNode) {
     // This hook is the "runtime controller" for one rendered node:

@@ -62,8 +62,8 @@ function ComponentRendererBase({ node }: Props) {
                 <GestureDetector gesture={gesture}>
                     {/* s.view is ViewStyle[] — spread it alongside animatedStyle */}
                     <Animated.View style={[...s.view, animatedStyle]}>
-                        {/* This inner View is the box we measure for drop hit-testing. */}
-                        <View ref={layoutRef} onLayout={reportLayout} style={{ flex: 1 }}>
+                        {/* This inner View owns child layout, so flexDirection/align/gap go here. */}
+                        <View ref={layoutRef} onLayout={reportLayout} style={s.viewChildren}>
                             {node.children?.map(child => (
                                 <ComponentRenderer key={child.id} node={child} />
                             ))}
