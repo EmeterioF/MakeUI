@@ -25,8 +25,10 @@ export type {
 export { findNode } from '@/editor/componentNodeTreeUtils';
 
 
-// Global canvas defaults used when app starts or when no custom settings are applied yet.
-const defaultCanvasConfig: CanvasConfig = {
+const DEFAULT_FILE_NAME = 'Untitled Screen.tsx';
+
+// Creates fresh canvas defaults for a new or reset editor session.
+const createDefaultCanvasConfig = (): CanvasConfig => ({
     layoutMode: 'flex',
     style: {
         flexDirection: 'column',
@@ -35,9 +37,13 @@ const defaultCanvasConfig: CanvasConfig = {
         flexWrap: 'nowrap',
         backgroundColor: '#ffffff',
     },
-};
+});
 
 export const useComponentNodeStore = create<CanvasState>((set, get) => ({
+    // === Active file state ===
+    // The editor can point at either a saved database row or a new unsaved file.
+    currentFileId: null,
+    currentFileName: DEFAULT_FILE_NAME,
     // === Core editor state ===
     // The live tree that represents what user is building in the editor.
     componentTree: [],
@@ -48,7 +54,43 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
     // Measured screen rectangles per node, used to detect drag/drop targets.
     layoutBounds: {},
     // Canvas (root container) layout config.
-    canvasConfig: defaultCanvasConfig,
+    canvasConfig: createDefaultCanvasConfig(),
+
+    // Keep the filename editable from the editor header.
+    setCurrentFileName: (fileName) => {
+        set({ currentFileName: fileName });
+    },
+
+    // Start with a clean canvas and no active database id.
+    startNewFile: () => {
+        set({
+            currentFileId: null,
+            currentFileName: DEFAULT_FILE_NAME,
+            componentTree: [],
+            selectedID: null,
+            hoveredParentID: null,
+            layoutBounds: {},
+            canvasConfig: createDefaultCanvasConfig(),
+        });
+    },
+
+    // Hydrate an existing saved file back into the editable editor state.
+    loadFile: ({ id, fileName, componentTree, canvasConfig }) => {
+        set({
+            currentFileId: id,
+            currentFileName: fileName,
+            componentTree,
+            canvasConfig,
+            selectedID: null,
+            hoveredParentID: null,
+            layoutBounds: {},
+        });
+    },
+
+    // After a save, attach the generated database id to this editor session.
+    markFileSaved: (id, fileName) => {
+        set({ currentFileId: id, currentFileName: fileName });
+    },
 
     // Select a node by id. Empty/invalid ids are normalized to null.
     selectNode: (id) => {
