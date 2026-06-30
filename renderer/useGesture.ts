@@ -31,8 +31,7 @@
     import { ComponentNode } from '@/editor/componentNodeTypes';
 
     // How long (ms) the finger must be held before a drag begins.
-    const LONG_PRESS_NORMAL = 200;  // Views, Text, Image
-    const LONG_PRESS_BUTTON = 250;  // Buttons need more time so quick taps don't drag.
+    const LONG_PRESS_TIME = 200;
 
 export function useGesture(node: ComponentNode) {
     // This hook is the "runtime controller" for one rendered node:
@@ -69,16 +68,10 @@ export function useGesture(node: ComponentNode) {
             });
         };
 
-        // ── Tap gesture ──────────────────────────────────────────────────────────
-        //
-        // maxDuration must be shorter than the pan's long-press threshold so the
-        // tap fails/expires before the pan activates, letting Exclusive give
-        // priority to the pan when the finger is held.
-        const longPressThreshold = node.type === 'Button' ? LONG_PRESS_BUTTON : LONG_PRESS_NORMAL;
 
         const tapGesture = Gesture.Tap()
             .runOnJS(true)
-            .maxDuration(longPressThreshold - 50)
+            .maxDuration(LONG_PRESS_TIME - 50)
             .onEnd(() => {
                 // Tapping an already-selected node walks selection up to its parent.
                 if (selectedID === node.id) {
@@ -91,7 +84,7 @@ export function useGesture(node: ComponentNode) {
         // ── Pan (drag) gesture ───────────────────────────────────────────────────
         const panGesture = Gesture.Pan()
             .runOnJS(true)
-            .activateAfterLongPress(longPressThreshold)
+            .activateAfterLongPress(LONG_PRESS_TIME)
             .onStart(() => {
                 // Fires the instant the long-press threshold is crossed and the
                 // drag becomes active. A medium impact buzz tells the user the
