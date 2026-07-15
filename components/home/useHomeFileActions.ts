@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
-import { router } from 'expo-router';
-import { useFocusEffect } from '@react-navigation/native';
+import { router, useFocusEffect } from 'expo-router';
 import { deleteComponentFile, getComponentFileById, listComponentFiles } from '@/data/componentFileRepository';
 import type { ComponentFileListItem } from '@/data/componentFileRepository';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';

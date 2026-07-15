@@ -269,4 +269,8 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
             },
         }));
     },
+
+    replaceTree: (newTree: ComponentNode[]) => {
+        set({ componentTree: newTree, selectedID: null });
+    },
 }));
