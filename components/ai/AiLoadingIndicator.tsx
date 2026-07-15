@@ -13,8 +13,8 @@ export function AiLoadingIndicator({ visible }: Props) {
       <View style={styles.overlay}>
         <View style={styles.container}>
           <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.text}>Enhancing layout...</Text>
-          <Text style={styles.subtext}>AI is analyzing your components</Text>
+          <Text style={styles.text}>Generating layout options...</Text>
+          <Text style={styles.subtext}>Creating variations for you to choose from</Text>
         </View>
       </View>
     </Modal>

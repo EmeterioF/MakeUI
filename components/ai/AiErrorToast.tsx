@@ -18,7 +18,7 @@ export function AiErrorToast({ message, onDismiss }: Props) {
         Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
       ]).start(() => onDismiss());
     }
-  }, [message]);
+  }, [message, onDismiss]);
 
   if (!message) return null;
 

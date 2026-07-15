@@ -1,16 +1,24 @@
 import { create } from 'zustand';
 import { ComponentNode } from './componentNodeTypes';
 import { useComponentNodeStore } from './componentNodeStore';
-import { generateLayoutSuggestion } from '@/services/aiLayoutService';
+import { generateLayoutSuggestions } from '@/services/aiLayoutService';
+
+interface AiSuggestion {
+  componentTree: ComponentNode[];
+  improvements: string[];
+  label: string;
+}
 
 interface AiSuggestionState {
-  aiSuggestions: ComponentNode[] | null;
+  aiSuggestions: AiSuggestion[] | null;
   aiOriginalTree: ComponentNode[] | null;
+  selectedIndex: number;
   aiLoading: boolean;
   aiError: string | null;
   showAiPreview: boolean;
 
   fetchSuggestions: () => Promise<void>;
+  selectSuggestion: (index: number) => void;
   applySuggestions: () => void;
   discardSuggestions: () => void;
   togglePreview: () => void;
@@ -19,6 +27,7 @@ interface AiSuggestionState {
 export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
   aiSuggestions: null,
   aiOriginalTree: null,
+  selectedIndex: 0,
   aiLoading: false,
   aiError: null,
   showAiPreview: false,
@@ -34,11 +43,12 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
     set({ aiLoading: true, aiError: null });
 
     try {
-      const result = await generateLayoutSuggestion(componentTree, canvasConfig);
+      const result = await generateLayoutSuggestions(componentTree, canvasConfig);
 
       set({
-        aiSuggestions: result.componentTree,
+        aiSuggestions: result.suggestions,
         aiOriginalTree: componentTree,
+        selectedIndex: 0,
         showAiPreview: true,
         aiLoading: false,
       });
@@ -50,15 +60,20 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
     }
   },
 
-  applySuggestions: () => {
-    const { aiSuggestions } = get();
-    if (!aiSuggestions) return;
+  selectSuggestion: (index: number) => {
+    set({ selectedIndex: index });
+  },
 
-    useComponentNodeStore.getState().replaceTree(aiSuggestions);
+  applySuggestions: () => {
+    const { aiSuggestions, selectedIndex } = get();
+    if (!aiSuggestions || selectedIndex < 1 || !aiSuggestions[selectedIndex - 1]) return;
+
+    useComponentNodeStore.getState().replaceTree(aiSuggestions[selectedIndex - 1].componentTree);
 
     set({
       aiSuggestions: null,
       aiOriginalTree: null,
+      selectedIndex: 0,
       showAiPreview: false,
       aiError: null,
     });
@@ -68,6 +83,7 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
     set({
       aiSuggestions: null,
       aiOriginalTree: null,
+      selectedIndex: 0,
       showAiPreview: false,
       aiError: null,
     });
