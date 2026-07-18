@@ -3,6 +3,7 @@ import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import { ButtonDefault, ImageDefault, TextDefault, ViewDefault } from '@/editor/defaultNodes';
 import { useEditorFileActions } from '@/components/editor/useEditorFileActions';
+import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
 
 type Props = {
     onOpenCanvasSettings: () => void;
@@ -13,6 +14,7 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }:
     const currentFileName = useComponentNodeStore((s) => s.currentFileName);
     const setCurrentFileName = useComponentNodeStore((s) => s.setCurrentFileName);
     const { isSaving, saveCurrentFile, saveAndGoHome, saveAndShare } = useEditorFileActions();
+    const { fetchSuggestions, aiLoading } = useAiSuggestionStore();
 
     const addButtons = [
         { label: 'VIEW', action: () => addNode(ViewDefault) },
@@ -87,6 +89,18 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }:
                     <Text style={styles.shareButtonText}>SHARE</Text>
                 </Pressable>
 
+            </View>
+
+            <View style={styles.aiSection}>
+                <Pressable
+                    style={[styles.enhanceBtn, aiLoading && styles.enhanceBtnDisabled]}
+                    onPress={fetchSuggestions}
+                    disabled={aiLoading}
+                >
+                    <Text style={styles.enhanceBtnText}>
+                        {aiLoading ? 'ENHANCING...' : 'ENHANCE LAYOUT'}
+                    </Text>
+                </Pressable>
             </View>
         </BottomSheetScrollView>
     );
@@ -231,5 +245,23 @@ const styles = StyleSheet.create({
         borderBottomColor: 'gray',
         borderBottomWidth: StyleSheet.hairlineWidth, // Creates a thin line based on screen density
         marginVertical: 10,
+    },
+    aiSection: {
+        marginTop: 16,
+        paddingHorizontal: 16,
+    },
+    enhanceBtn: {
+        backgroundColor: '#007AFF',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+    },
+    enhanceBtnDisabled: {
+        backgroundColor: '#ccc',
+    },
+    enhanceBtnText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 14,
     },
 });

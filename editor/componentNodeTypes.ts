@@ -99,4 +99,5 @@ export interface CanvasState {
     // Moves an existing node into a different View parent.
     dropNodeIntoParent: (id: string, parentId: string, dx: number, dy: number) => boolean;
     updateCanvasConfig: (updates: { layoutMode?: LayoutMode; style?: Partial<CanvasConfig['style']> }) => void;
+    replaceTree: (newTree: ComponentNode[]) => void;
 }
