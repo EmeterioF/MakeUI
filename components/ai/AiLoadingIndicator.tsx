@@ -9,7 +9,7 @@ export function AiLoadingIndicator({ visible }: Props) {
   if (!visible) return null;
 
   return (
-    <Modal transparent animationType="fade">
+    <Modal transparent animationType="fade" visible={visible}>
       <View style={styles.overlay}>
         <View style={styles.container}>
           <ActivityIndicator size="large" color="#007AFF" />

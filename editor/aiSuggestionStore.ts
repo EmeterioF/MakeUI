@@ -44,6 +44,7 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
 
     try {
       const result = await generateLayoutSuggestions(componentTree, canvasConfig);
+      console.log('[AiStore] result keys:', Object.keys(result), 'suggestions count:', result.suggestions?.length)
 
       set({
         aiSuggestions: result.suggestions,

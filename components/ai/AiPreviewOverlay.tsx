@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Modal, ScrollView, Dimensions } from 'react-native';
 import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
 import ComponentRenderer from '@/renderer/componentRenderer';
@@ -19,6 +19,11 @@ export function AiPreviewOverlay() {
   } = useAiSuggestionStore();
 
   const scrollRef = useRef<ScrollView>(null);
+  const [showInfo, setShowInfo] = useState(false);
+
+  const currentImprovements = selectedIndex > 0
+    ? (aiSuggestions[selectedIndex - 1]?.improvements ?? [])
+    : [];
 
   if (!showAiPreview || !aiSuggestions) return null;
 
@@ -69,11 +74,30 @@ export function AiPreviewOverlay() {
           </View>
 
           <View style={styles.labelRow}>
-            <Text style={styles.pageLabel}>{currentLabel}</Text>
+            <View style={styles.labelLeft}>
+              <Text style={styles.pageLabel}>{currentLabel}</Text>
+              {currentImprovements.length > 0 && (
+                <Pressable onPress={() => setShowInfo((v) => !v)} style={styles.infoBtn} hitSlop={8}>
+                  <Text style={styles.infoBtnText}>?</Text>
+                </Pressable>
+              )}
+            </View>
             <Text style={styles.pageCounter}>
               {selectedIndex + 1} / {totalPages}
             </Text>
           </View>
+
+          {showInfo && currentImprovements.length > 0 && (
+            <>
+              <Pressable style={styles.tooltipBackdrop} onPress={() => setShowInfo(false)} />
+              <View style={styles.infoTooltip}>
+                <Text style={styles.infoTooltipTitle}>Improvements:</Text>
+                {currentImprovements.slice(0, 3).map((item, i) => (
+                  <Text key={i} style={styles.infoTooltipItem}>• {item}</Text>
+                ))}
+              </View>
+            </>
+          )}
 
           <View style={styles.carouselContainer}>
             <ScrollView
@@ -120,15 +144,6 @@ export function AiPreviewOverlay() {
               </Pressable>
             ))}
           </View>
-
-          {selectedIndex > 0 && aiSuggestions[selectedIndex - 1]?.improvements?.length > 0 && (
-            <View style={styles.improvementsContainer}>
-              <Text style={styles.improvementsTitle}>Improvements:</Text>
-              {aiSuggestions[selectedIndex - 1].improvements.slice(0, 3).map((item, i) => (
-                <Text key={i} style={styles.improvementItem}>• {item}</Text>
-              ))}
-            </View>
-          )}
 
           <View style={styles.actions}>
             <Pressable style={styles.discardBtn} onPress={discardSuggestions}>
@@ -242,20 +257,62 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
   },
-  improvementsContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
+  labelLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  improvementsTitle: {
+  infoBtn: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#e8e8e8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  infoBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#888',
+    marginTop: -1,
+  },
+  tooltipBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 99,
+  },
+  infoTooltip: {
+    position: 'absolute',
+    top: 82,
+    left: 12,
+    right: 12,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    zIndex: 100,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  infoTooltipTitle: {
     fontSize: 12,
     fontWeight: '600',
     color: '#666',
-    marginBottom: 2,
+    marginBottom: 4,
   },
-  improvementItem: {
-    fontSize: 11,
-    color: '#888',
-    lineHeight: 16,
+  infoTooltipItem: {
+    fontSize: 12,
+    color: '#555',
+    lineHeight: 18,
   },
   actions: {
     flexDirection: 'row',

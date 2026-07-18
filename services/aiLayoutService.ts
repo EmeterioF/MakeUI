@@ -1,162 +1,51 @@
-import { ComponentNode, CanvasConfig } from '@/editor/componentNodeTypes';
+import { ComponentNode, CanvasConfig } from '@/editor/componentNodeTypes'
 
-const OPENAI_API_URL = 'https://models.github.ai/inference/chat/completions';
+const BACKEND_URL = process.env.EXPO_PUBLIC_AI_BACKEND_URL || 'http://localhost:3000'
+const AUTH_TOKEN = process.env.EXPO_PUBLIC_AI_AUTH_TOKEN
 
-interface AiLayoutSuggestion {
-  componentTree: ComponentNode[];
-  improvements: string[];
-  label: string;
-}
+const TIMEOUT_MS = 30_000
 
 interface AiLayoutMultiResponse {
-  suggestions: AiLayoutSuggestion[];
-}
-
-function stripCodeFences(content: string): string {
-  return content
-    .replace(/^```(?:json)?\s*\n?/i, '')
-    .replace(/\n?```\s*$/i, '')
-    .trim();
-}
-
-function isValidComponentNode(node: any): boolean {
-  return (
-    node &&
-    typeof node === 'object' &&
-    typeof node.id === 'string' &&
-    ['View', 'Text', 'Button', 'Image'].includes(node.type) &&
-    typeof node.x === 'number' &&
-    typeof node.y === 'number' &&
-    node.style &&
-    typeof node.style === 'object'
-  );
-}
-
-function validateComponentTree(tree: any): ComponentNode[] | null {
-  if (!Array.isArray(tree)) return null;
-  if (tree.length === 0) return null;
-  return tree.every(isValidComponentNode) ? tree : null;
+  suggestions: Array<{
+    componentTree: ComponentNode[]
+    improvements: string[]
+    label: string
+  }>
 }
 
 export async function generateLayoutSuggestions(
   currentTree: ComponentNode[],
   canvasConfig: CanvasConfig
 ): Promise<AiLayoutMultiResponse> {
-  const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
-  const systemPrompt = `You are a React Native UI layout expert specializing in Material Design for Android.
-
-Your task is to analyze a component tree and suggest 4 DISTINCT layout improvements.
-
-Each suggestion should focus on a different improvement area:
-1. "Spacing Focus" - Improve padding, margins, gaps between components
-2. "Alignment Focus" - Improve flex alignment, justify content, align items, layout direction
-3. "Visual Polish" - Improve colors, border radius, typography, visual consistency
-4. "Balanced" - A well-rounded improvement across all areas
-
-RULES:
-1. Return ONLY valid JSON matching the exact schema below
-2. Follow Material Design guidelines for Android
-3. Do NOT add new components - only improve existing ones
-4. Do NOT change component types - only adjust style properties
-5. Keep the same nesting structure and component IDs
-6. Each suggestion must be meaningfully different from the others
-7. Preserve all x, y coordinates exactly as provided
-
-ComponentNode schema:
-{
-  "id": "string",
-  "type": "View" | "Text" | "Button" | "Image",
-  "x": number,
-  "y": number,
-  "style": ComponentStyle,
-  "content": "string",
-  "children": ComponentNode[]
-}
-
-Response JSON schema:
-{
-  "suggestions": [
-    {
-      "label": "Spacing Focus",
-      "componentTree": [...improved nodes...],
-      "improvements": ["list of changes made"]
-    },
-    {
-      "label": "Alignment Focus",
-      "componentTree": [...improved nodes...],
-      "improvements": ["list of changes made"]
-    },
-    {
-      "label": "Visual Polish",
-      "componentTree": [...improved nodes...],
-      "improvements": ["list of changes made"]
-    },
-    {
-      "label": "Balanced",
-      "componentTree": [...improved nodes...],
-      "improvements": ["list of changes made"]
+  try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (AUTH_TOKEN) {
+      headers['Authorization'] = `Bearer ${AUTH_TOKEN}`
     }
-  ]
-}`;
 
-  const userPrompt = `Improve this React Native layout with 4 distinct variations:
+    const url = `${BACKEND_URL}/api/ai/layout`
+    console.log('[AiLayout] POST', url)
 
-Current component tree:
-${JSON.stringify(currentTree, null, 2)}
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ componentTree: currentTree, canvasConfig }),
+      signal: controller.signal,
+    })
 
-Canvas config:
-${JSON.stringify(canvasConfig, null, 2)}
-
-Return exactly 4 suggestions as valid JSON.`;
-
-  const response = await fetch(OPENAI_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'openai/gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.4,
-      max_tokens: 8000,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  if (!data.choices?.[0]?.message?.content) {
-    throw new Error('AI returned empty response');
-  }
-
-  const content = stripCodeFences(data.choices[0].message.content);
-  const parsed = JSON.parse(content);
-
-  const rawSuggestions = parsed.suggestions || (Array.isArray(parsed) ? parsed : [parsed]);
-  const validSuggestions: AiLayoutSuggestion[] = [];
-
-  for (const raw of rawSuggestions) {
-    const tree = validateComponentTree(raw.componentTree);
-    if (tree) {
-      validSuggestions.push({
-        componentTree: tree,
-        improvements: Array.isArray(raw.improvements) ? raw.improvements : [],
-        label: raw.label || `Suggestion ${validSuggestions.length + 1}`,
-      });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+      console.error('[AiLayout] Error response', res.status, err)
+      throw new Error(err.error || 'AI backend request failed')
     }
-  }
 
-  if (validSuggestions.length === 0) {
-    throw new Error('AI returned no valid suggestions');
+    const data = await res.json()
+    console.log('[AiLayout] Success', data)
+    return data
+  } finally {
+    clearTimeout(timeout)
   }
-
-  return { suggestions: validSuggestions.slice(0, 4) };
 }
