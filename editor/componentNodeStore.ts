@@ -44,6 +44,7 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
     // The editor can point at either a saved database row or a new unsaved file.
     currentFileId: null,
     currentFileName: DEFAULT_FILE_NAME,
+    currentProjectId: null,
     // === Core editor state ===
     // The live tree that represents what user is building in the editor.
     componentTree: [],
@@ -61,11 +62,16 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
         set({ currentFileName: fileName });
     },
 
+    setCurrentProjectId: (projectId: number | null) => {
+        set({ currentProjectId: projectId });
+    },
+
     // Start with a clean canvas and no active database id.
-    startNewFile: () => {
+    startNewFile: (projectId?: number) => {
         set({
             currentFileId: null,
             currentFileName: DEFAULT_FILE_NAME,
+            currentProjectId: projectId ?? null,
             componentTree: [],
             selectedID: null,
             hoveredParentID: null,

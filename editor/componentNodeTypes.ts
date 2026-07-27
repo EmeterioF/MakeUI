@@ -75,6 +75,7 @@ export interface CanvasConfig {
 export interface CanvasState {
     currentFileId: number | null;
     currentFileName: string;
+    currentProjectId: number | null;
     componentTree: ComponentNode[];
     selectedID: string | null;
     hoveredParentID: string | null;
@@ -84,7 +85,8 @@ export interface CanvasState {
     canvasConfig: CanvasConfig;
 
     setCurrentFileName: (fileName: string) => void;
-    startNewFile: () => void;
+    setCurrentProjectId: (projectId: number | null) => void;
+    startNewFile: (projectId?: number) => void;
     loadFile: (file: {
         id: number;
         fileName: string;

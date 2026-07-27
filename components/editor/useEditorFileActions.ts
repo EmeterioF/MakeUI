@@ -10,6 +10,7 @@ export function useEditorFileActions() {
     const currentFileName = useComponentNodeStore((s) => s.currentFileName);
     const componentTree = useComponentNodeStore((s) => s.componentTree);
     const canvasConfig = useComponentNodeStore((s) => s.canvasConfig);
+    const currentProjectId = useComponentNodeStore((s) => s.currentProjectId);
     const markFileSaved = useComponentNodeStore((s) => s.markFileSaved);
     const showSaveNotice = useEditorSaveNoticeStore((s) => s.showSaveNotice);
     const [isSaving, setIsSaving] = useState(false);
@@ -29,6 +30,7 @@ export function useEditorFileActions() {
                 fileName: currentFileName,
                 componentTree,
                 canvasConfig,
+                projectId: currentProjectId ?? undefined,
             });
             markFileSaved(savedFile.id, savedFile.fileName);
             showSaveNotice('Saved');
@@ -41,7 +43,7 @@ export function useEditorFileActions() {
             savingRef.current = false;
             setIsSaving(false);
         }
-    }, [canvasConfig, componentTree, currentFileId, currentFileName, markFileSaved, showSaveNotice]);
+    }, [canvasConfig, componentTree, currentFileId, currentFileName, currentProjectId, markFileSaved, showSaveNotice]);
 
     const saveAndGoHome = useCallback(async () => {
         const savedFile = await saveCurrentFile();

@@ -97,7 +97,16 @@ const renderNode = (node: ComponentNode, counter: { value: number }, depth = 2):
     };
 };
 
-export const convertTreeToReactNativeCode = (componentTree: ComponentNode[], canvasConfig: CanvasConfig): string => {
+const sanitizeFunctionName = (name: string): string => {
+    const cleaned = name.replace(/[^a-zA-Z0-9_]/g, '_');
+    return /^[a-zA-Z]/.test(cleaned) ? cleaned : `Screen_${cleaned}`;
+};
+
+export const convertTreeToReactNativeCode = (
+    componentTree: ComponentNode[],
+    canvasConfig: CanvasConfig,
+    screenName: string = 'GeneratedScreen',
+): string => {
     const counter = { value: 0 };
     const rendered = componentTree.map((node) => renderNode(node, counter, 2));
     const treeJsx = rendered.map((node) => node.jsx).join('\n');
@@ -133,7 +142,7 @@ export const convertTreeToReactNativeCode = (componentTree: ComponentNode[], can
         'import React from \'react\';',
         'import { Image, Pressable, ScrollView, StyleSheet, Text, View } from \'react-native\';',
         '',
-        'export default function GeneratedScreen() {',
+        `export default function ${sanitizeFunctionName(screenName)}() {`,
         '    return (',
         '        <View style={styles.root}>',
         treeJsx || '            {/* Empty canvas */}',

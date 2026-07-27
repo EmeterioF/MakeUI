@@ -13,6 +13,7 @@ type SaveComponentFileInput = {
     fileName: string;
     componentTree: ComponentNode[];
     canvasConfig: CanvasConfig;
+    projectId?: number;
 };
 
 const FALLBACK_FILE_NAME = 'Untitled Screen.tsx';
@@ -41,6 +42,7 @@ export const saveComponentFile = async ({
     fileName,
     componentTree,
     canvasConfig,
+    projectId,
 }: SaveComponentFileInput): Promise<{ id: number; fileName: string; code: string }> => {
     const normalizedFileName = cleanFileName(fileName);
     // The file-management system stores both the editable editor state and the
@@ -50,6 +52,8 @@ export const saveComponentFile = async ({
 
     if (id) {
         // Existing files update in place so Home keeps the same row and share target.
+        // project_id is intentionally NOT passed here — once a screen belongs to a
+        // project, it stays there. Moving screens between projects is a separate feature.
         const existingFile = await getComponentFileById(id);
         if (existingFile) {
             await updateComponentFile(id, normalizedFileName, code, componentTree, canvasConfig);
@@ -58,7 +62,7 @@ export const saveComponentFile = async ({
     }
 
     // Unsaved files, or files deleted while still open, get a new database row.
-    const nextId = await createComponentFile(normalizedFileName, code, componentTree, canvasConfig);
+    const nextId = await createComponentFile(normalizedFileName, code, componentTree, canvasConfig, projectId);
     return { id: nextId, fileName: normalizedFileName, code };
 };
 

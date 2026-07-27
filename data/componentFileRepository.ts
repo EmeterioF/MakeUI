@@ -145,7 +145,6 @@ export const updateComponentFile = async (
     code: string,
     componentTree: ComponentNode[],
     canvasConfig: CanvasConfig,
-    project_id?: number
 ): Promise<void> => {
     const db = await ensureTable();
     await db.runAsync(
@@ -156,7 +155,6 @@ export const updateComponentFile = async (
                 code = ?,
                 component_tree_json = ?,
                 canvas_config_json = ?,
-                project_id = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?;
         `,
@@ -164,7 +162,6 @@ export const updateComponentFile = async (
         code,
         serialize(componentTree),
         serialize(canvasConfig),
-        project_id ?? null,
         id
     );
 };

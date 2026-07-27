@@ -6,12 +6,14 @@ import type { ComponentFileListItem } from '@/data/componentFileRepository';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import { useProjectStore } from '@/editor/projectStore';
 import { shareComponentFileById } from '@/services/componentFileService';
+import { exportProjectAsZip } from '@/services/projectExportService';
 
 export function useHomeFileActions() {
     const [files, setFiles] = useState<ComponentFileListItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const startNewFile = useComponentNodeStore((s) => s.startNewFile);
     const loadFile = useComponentNodeStore((s) => s.loadFile);
+    const loadProjects = useProjectStore((s) => s.loadProjects);
 
     const refreshFiles = useCallback(async () => {
         setIsLoading(true);
@@ -25,19 +27,27 @@ export function useHomeFileActions() {
         }
     }, []);
 
-    // The home file-management hook is the single place that lists, opens,
-    // shares, and deletes persisted component files for the Home screen.
-    // Keeping this workflow here leaves app/index.tsx focused on rendering.
+    const refreshAll = useCallback(() => {
+        void refreshFiles();
+        void loadProjects();
+    }, [refreshFiles, loadProjects]);
+
     useFocusEffect(
         useCallback(() => {
-            void refreshFiles();
-        }, [refreshFiles])
+            void refreshAll();
+        }, [refreshAll])
     );
 
-    const handleCreate = useCallback(() => {
-        startNewFile();
-        router.push('./editor');
-    }, [startNewFile]);
+    const handleCreate = useCallback(
+        (projectId?: number) => {
+            if (projectId !== undefined) {
+                useProjectStore.getState().selectProject(projectId);
+            }
+            startNewFile(projectId);
+            router.push('./editor');
+        },
+        [startNewFile]
+    );
 
     const handleOpen = useCallback(
         async (id: number) => {
@@ -49,8 +59,6 @@ export function useHomeFileActions() {
                     return;
                 }
 
-                // Opening a file hydrates the editor store from the saved row.
-                // Future editor saves reuse file.id so Home keeps the same list item.
                 loadFile({
                     id: file.id,
                     fileName: file.file_name,
@@ -97,11 +105,41 @@ export function useHomeFileActions() {
         [refreshFiles]
     );
 
-    const handleCreateProject = useCallback(async () => {
-        const { createProject, selectProject, loadProjects } = useProjectStore.getState();
-        const id = await createProject('New Project');
+    const handleCreateProject = useCallback(async (name: string) => {
+        const { createProject, selectProject } = useProjectStore.getState();
+        const id = await createProject(name);
         if (id !== null) {
             await selectProject(id);
+        }
+    }, []);
+
+    const handleDeleteProject = useCallback(
+        (id: number, projectName: string) => {
+            Alert.alert(
+                'Delete project?',
+                `"${projectName}" and all its screens will be removed.`,
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Delete',
+                        style: 'destructive',
+                        onPress: async () => {
+                            const { deleteProject } = useProjectStore.getState();
+                            await deleteProject(id);
+                        },
+                    },
+                ]
+            );
+        },
+        []
+    );
+
+    const handleExportProject = useCallback(async (projectId: number) => {
+        try {
+            await exportProjectAsZip(projectId);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Export failed.';
+            Alert.alert('Export failed', message);
         }
     }, []);
 
@@ -113,5 +151,7 @@ export function useHomeFileActions() {
         handleShare,
         handleDelete,
         handleCreateProject,
+        handleDeleteProject,
+        handleExportProject,
     };
 }
