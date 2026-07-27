@@ -4,6 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { deleteComponentFile, getComponentFileById, listComponentFiles } from '@/data/componentFileRepository';
 import type { ComponentFileListItem } from '@/data/componentFileRepository';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
+import { useProjectStore } from '@/editor/projectStore';
 import { shareComponentFileById } from '@/services/componentFileService';
 
 export function useHomeFileActions() {
@@ -96,6 +97,14 @@ export function useHomeFileActions() {
         [refreshFiles]
     );
 
+    const handleCreateProject = useCallback(async () => {
+        const { createProject, selectProject, loadProjects } = useProjectStore.getState();
+        const id = await createProject('New Project');
+        if (id !== null) {
+            await selectProject(id);
+        }
+    }, []);
+
     return {
         files,
         isLoading,
@@ -103,5 +112,6 @@ export function useHomeFileActions() {
         handleOpen,
         handleShare,
         handleDelete,
+        handleCreateProject,
     };
 }
