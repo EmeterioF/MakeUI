@@ -217,7 +217,7 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
         // 1) Resolve both sides of the move from the current tree snapshot.
         const movingNode = findNode(componentTree, id);
         const parentNodeCandidate = findNode(componentTree, parentId);
-        if (!movingNode || !parentNodeCandidate || parentNodeCandidate.type !== 'View') return false;
+        if (!movingNode || !parentNodeCandidate || (parentNodeCandidate.type !== 'View' && parentNodeCandidate.type !== 'ScrollView')) return false;
 
         //------------ FALLBACKS
 
@@ -236,7 +236,7 @@ export const useComponentNodeStore = create<CanvasState>((set, get) => ({
 
         // 5) Re-read the target parent from the updated tree after extraction.
         const parentAfter = findNode(treeWithoutNode, parentId);
-        if (!parentAfter || parentAfter.type !== 'View') return false;
+        if (!parentAfter || (parentAfter.type !== 'View' && parentAfter.type !== 'ScrollView')) return false;
 
         // 6) Normalize style defaults for the new container's layout rules. it is to ensure that view always is flex
         const parentLayoutMode = parentAfter.style.layoutMode ?? 'flex';

@@ -52,7 +52,7 @@ export const findParentAndIndex = (
 export const addNodeToCanvas = (node: ComponentNode, parentLayoutMode: LayoutMode): ComponentNode => {
     // Only container nodes need layout normalization when they enter a canvas/View.
     // Leaf nodes (Text, Button, Image) can be reused as-is.
-    if (node.type !== 'View') return node;
+        if (node.type !== 'View' && node.type !== 'ScrollView') return node;
 
     return {
         ...node,
@@ -67,7 +67,7 @@ export const addNodeToCanvas = (node: ComponentNode, parentLayoutMode: LayoutMod
 export const appendChildToView = (nodes: ComponentNode[], parentId: string, child: ComponentNode): [ComponentNode[], boolean] =>
     updateTreeById(nodes, parentId, (node) => {
         // Step 1) Parent must be a View to accept children.
-        if (node.type !== 'View') return node;
+    if (node.type !== 'View' && node.type !== 'ScrollView') return node;
         return {
             ...node,
             style: {

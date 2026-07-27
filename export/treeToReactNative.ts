@@ -64,11 +64,35 @@ const renderNode = (node: ComponentNode, counter: { value: number }, depth = 2):
         };
     }
 
+    if (node.type === 'ScrollView') {
+        const children = (node.children ?? []).map((child) => renderNode(child, counter, depth + 1));
+        const childrenJsx = children.map((child) => child.jsx).join('\n');
+        const horizontalAttr = node.style.horizontal ? ' horizontal' : '';
+        return {
+            jsx: childrenJsx
+                ? `${pad}<ScrollView style={styles.${styleName}}${horizontalAttr}>${childrenJsx ? `\n${childrenJsx}\n${pad}` : ''}</ScrollView>`
+                : `${pad}<ScrollView style={styles.${styleName}}${horizontalAttr} />`,
+            styleLines: [...styleLines, ...children.flatMap((child) => child.styleLines)],
+        };
+    }
+
     const source = node.content?.trim();
+    if (!source) {
+        return {
+            jsx: `${pad}<View style={[styles.${styleName}, styles.imagePlaceholder]}>\n${childPad}<Text style={styles.imagePlaceholderText}>Image</Text>\n${pad}</View>`,
+            styleLines,
+        };
+    }
+
+    if (source.startsWith('file://')) {
+        return {
+            jsx: `${pad}<Image source={{ uri: 'YOUR_IMAGE_URL' }} resizeMode="${node.style.resizeMode || 'cover'}" />{/* TODO: replace with your image URL */}`,
+            styleLines,
+        };
+    }
+
     return {
-        jsx: source
-            ? `${pad}<Image source={{ uri: '${escapeString(source)}' }} style={styles.${styleName}} />`
-            : `${pad}<View style={[styles.${styleName}, styles.imagePlaceholder]}>\n${childPad}<Text style={styles.imagePlaceholderText}>Image</Text>\n${pad}</View>`,
+        jsx: `${pad}<Image source={{ uri: '${escapeString(source)}' }} resizeMode="${node.style.resizeMode || 'cover'}" style={styles.${styleName}} />`,
         styleLines,
     };
 };
@@ -107,7 +131,7 @@ export const convertTreeToReactNativeCode = (componentTree: ComponentNode[], can
 
     return [
         'import React from \'react\';',
-        'import { Image, Pressable, StyleSheet, Text, View } from \'react-native\';',
+        'import { Image, Pressable, ScrollView, StyleSheet, Text, View } from \'react-native\';',
         '',
         'export default function GeneratedScreen() {',
         '    return (',

@@ -58,12 +58,7 @@ export const getNodeStyle = (
         ...viewBoxStyle
     } = node.style as ViewStyle;
 
-    // View nodes have two layers:
-    // 1) outer box: size/background/border/drag/selection
-    // 2) inner content: flex layout for the children
-    // Flex props must live on the inner View because that is where children render.
-    const viewChildrenStyle = {
-        flex: 1,
+    const flexLayout = {
         flexDirection,
         justifyContent,
         alignItems,
@@ -80,7 +75,9 @@ export const getNodeStyle = (
 
     return {
         view: [viewBoxStyle, selection, dropTarget] as ViewStyle[],
-        viewChildren: viewChildrenStyle,
+        viewChildren: { flex: 1, ...flexLayout } as ViewStyle,
+        scrollView: [viewBoxStyle, selection, dropTarget] as ViewStyle[],
+        scrollViewContent: flexLayout,
         text: [nodeStyle, selection] as TextStyle[],
         button: [{ justifyContent: 'center', alignItems: 'center' }, nodeStyle, selection] as ViewStyle[],
         buttonLabel: [base.buttonLabel, { color: node.style.color ?? '#fff' }] as TextStyle[],

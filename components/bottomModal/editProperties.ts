@@ -1,6 +1,6 @@
 import { ComponentType } from '@/editor/componentNodeTypes';
 
-export type PropertyFieldType = 'number' | 'color' | 'select' | 'text';
+export type PropertyFieldType = 'number' | 'color' | 'select' | 'text' | 'imagePicker';
 
 export type PropertyField = {
     label: string;
@@ -68,9 +68,18 @@ export const properties: PropertySection[] = [
         ]
     },
     {
+        header: 'ScrollView',
+        styles: [
+            { label: 'Horizontal', key: 'horizontal', type: 'select', options: ['false', 'true'] },
+            { label: 'Show Indicators', key: 'showsVerticalScrollIndicator', type: 'select', options: ['true', 'false'] },
+            { label: 'Bounces', key: 'bounces', type: 'select', options: ['true', 'false'] },
+        ]
+    },
+    {
         header: 'Image',
         styles: [
             { label: 'Resize Mode', key: 'resizeMode', type: 'select', options: ['cover', 'contain', 'stretch', 'center'] },
+            { label: 'Pick Image', key: 'content', type: 'imagePicker' },
         ]
     },
     {
@@ -90,6 +99,7 @@ const PROPERTY_SECTIONS_BY_COMPONENT: Record<ComponentType, PropertySection['hea
     Text: ['Position', 'Layout', 'Border', 'Background', 'Text'],
     Button: ['Position', 'Layout', 'Border', 'Background', 'Text'],
     Image: ['Position', 'Layout', 'Border', 'Background', 'Image'],
+    ScrollView: ['Position', 'Layout', 'Border', 'Background', 'ScrollView'],
 };
 
 export function getPropertiesForComponent(type: ComponentType): PropertySection[] {

@@ -1,4 +1,4 @@
-export type ComponentType = 'View' | 'Text' | 'Button' | 'Image';
+export type ComponentType = 'View' | 'Text' | 'Button' | 'Image' | 'ScrollView';
 export type LayoutMode = 'flex';
 
 export interface ComponentStyle {
@@ -40,6 +40,11 @@ export interface ComponentStyle {
     color?: string;
     textAlign?: 'left' | 'center' | 'right' | 'justify';
     layoutMode?: LayoutMode;
+    horizontal?: boolean;
+    showsVerticalScrollIndicator?: boolean;
+    showsHorizontalScrollIndicator?: boolean;
+    bounces?: boolean;
+    nestedScrollEnabled?: boolean;
 }
 
 export interface ComponentNode {

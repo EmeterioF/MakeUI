@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
-import { ButtonDefault, ImageDefault, TextDefault, ViewDefault } from '@/editor/defaultNodes';
+import { ButtonDefault, ImageDefault, ScrollViewDefault, TextDefault, ViewDefault } from '@/editor/defaultNodes';
 import { useEditorFileActions } from '@/components/editor/useEditorFileActions';
 import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
 
@@ -21,6 +21,7 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }:
         { label: 'TEXT', action: () => addNode(TextDefault) },
         { label: 'BUTTON', action: () => addNode(ButtonDefault) },
         { label: 'IMAGE', action: () => addNode(ImageDefault) },
+        { label: 'SCROLLVIEW', action: () => addNode(ScrollViewDefault) },
     ];
 
     return (

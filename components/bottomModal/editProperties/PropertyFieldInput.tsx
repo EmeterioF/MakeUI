@@ -3,6 +3,7 @@ import { PropertyField } from '@/components/bottomModal/editProperties';
 import { NumericInput } from '@/components/bottomModal/editProperties/inputs/NumericInput';
 import { ColorPickerInput } from '@/components/bottomModal/editProperties/inputs/ColorPickerInput';
 import { SelectInput } from '@/components/bottomModal/editProperties/inputs/SelectInput';
+import { ImagePickerInput } from '@/components/bottomModal/editProperties/inputs/ImagePickerInput';
 import { editPropsStyles as styles } from '@/components/bottomModal/editProperties/styles';
 
 type PropertyFieldInputProps = {
@@ -33,6 +34,15 @@ export function PropertyFieldInput({ item, value, onChange, onStep }: PropertyFi
                 value={value}
                 options={item.options ?? []}
                 onChange={(nextValue) => onChange(item.key, nextValue, item.type)}
+            />
+        );
+    }
+
+    if (item.type === 'imagePicker') {
+        return (
+            <ImagePickerInput
+                value={value}
+                onChange={(uri: string) => onChange('content', uri, 'text')}
             />
         );
     }

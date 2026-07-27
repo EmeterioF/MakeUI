@@ -18,7 +18,7 @@
  */
 
 import React, { memo } from 'react';
-import { Image, Text, View } from 'react-native';
+import { Image, ScrollView, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { getNodeStyle } from '@/renderer/nodeStyles';
@@ -40,7 +40,7 @@ function ComponentRendererBase({ node }: Props) {
     const hoveredParentID = useComponentNodeStore(s => s.hoveredParentID);
 
     const isSelected   = selectedID === node.id;
-    const isDropTarget = node.type === 'View' && hoveredParentID === node.id;
+    const isDropTarget = (node.type === 'View' || node.type === 'ScrollView') && hoveredParentID === node.id;
 
     // ── Styles ───────────────────────────────────────────────────────────────
     const s = getNodeStyle(node, isSelected, isDropTarget);
@@ -60,14 +60,34 @@ function ComponentRendererBase({ node }: Props) {
         case 'View':
             return (
                 <GestureDetector gesture={gesture}>
-                    {/* s.view is ViewStyle[] — spread it alongside animatedStyle */}
                     <Animated.View style={[...s.view, animatedStyle]}>
-                        {/* This inner View owns child layout, so flexDirection/align/gap go here. */}
                         <View ref={layoutRef} onLayout={reportLayout} style={s.viewChildren}>
                             {node.children?.map(child => (
                                 <ComponentRenderer key={child.id} node={child} />
                             ))}
                         </View>
+                    </Animated.View>
+                </GestureDetector>
+            );
+
+        case 'ScrollView':
+            return (
+                <GestureDetector key={node.id} gesture={gesture}>
+                    <Animated.View style={[...s.view, animatedStyle]}>
+                        <ScrollView
+                            ref={layoutRef}
+                            onLayout={reportLayout}
+                            style={s.scrollView}
+                            contentContainerStyle={s.scrollViewContent}
+                            nestedScrollEnabled={node.style.nestedScrollEnabled}
+                            horizontal={node.style.horizontal}
+                            showsVerticalScrollIndicator={node.style.showsVerticalScrollIndicator}
+                            showsHorizontalScrollIndicator={node.style.showsHorizontalScrollIndicator}
+                        >
+                            {node.children?.map((child) => (
+                                <ComponentRenderer key={child.id} node={child} />
+                            ))}
+                        </ScrollView>
                     </Animated.View>
                 </GestureDetector>
             );

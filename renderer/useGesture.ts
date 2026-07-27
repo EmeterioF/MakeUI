@@ -85,6 +85,8 @@ export function useGesture(node: ComponentNode) {
         const panGesture = Gesture.Pan()
             .runOnJS(true)
             .activateAfterLongPress(LONG_PRESS_TIME)
+            .activeOffsetY(10)
+            .activeOffsetX(10)
             .onStart(() => {
                 // Fires the instant the long-press threshold is crossed and the
                 // drag becomes active. A medium impact buzz tells the user the

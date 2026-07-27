@@ -30,7 +30,7 @@ export const findViewTargetAtPoint = (
             if (excludedIds.has(node.id)) continue;
 
             const bounds = layoutBounds[node.id];
-            if (node.type === 'View' && bounds && pointInRect(pageX, pageY, bounds)) {
+            if ((node.type === 'View' || node.type === 'ScrollView') && bounds && pointInRect(pageX, pageY, bounds)) {
                 const area = bounds.width * bounds.height;
                 if (depth > bestDepth || (depth === bestDepth && area < bestArea)) {
                     bestId = node.id;

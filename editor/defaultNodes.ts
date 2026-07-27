@@ -30,6 +30,18 @@ export const ButtonDefault: Omit<ComponentNode, 'id'> = {
     content: 'Button',
 };
 
+export const ScrollViewDefault: Omit<ComponentNode, 'id'> = {
+    type: 'ScrollView',
+    x: 0, y: 0,
+    style: {
+        flex: 1,
+        padding: 12,
+        gap: 8,
+        flexDirection: 'column',
+    },
+    children: [],
+};
+
 export const ImageDefault: Omit<ComponentNode, 'id'> = {
     type: 'Image',
     x: 0, y: 0,
