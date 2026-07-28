@@ -33,7 +33,7 @@ export default function BottomSheetContentEditProperties({ onBack, onDelete }: P
         [visibleProperties, selectedHeader]
     );
 
-    if (!selectedNode) return null;
+    if (!selectedNode) return <View style={styles.scrollContent} />;
 
     return (
         <BottomSheetScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>

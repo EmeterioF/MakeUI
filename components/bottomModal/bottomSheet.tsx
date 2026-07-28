@@ -41,8 +41,14 @@ export default function BottomSheet() {
 
     const handleBack = () => selectNode(null);
     const handleDelete = () => deleteNode(selectedID);
-    const handleOpenCanvasSettings = () => setActiveSheet('canvasSettings');
-    const handleCanvasSettingsBack = () => setActiveSheet('add');
+    const handleOpenCanvasSettings = () => {
+        addModalRef.current?.dismiss();
+        setActiveSheet('canvasSettings');
+    };
+    const handleCanvasSettingsBack = () => {
+        canvasSettingsModalRef.current?.dismiss();
+        setActiveSheet('add');
+    };
 
     return (
         <View>

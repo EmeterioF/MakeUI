@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
+import { useProjectStore } from '@/editor/projectStore';
 import { saveComponentFile, shareComponentFileById } from '@/services/componentFileService';
 import { useEditorSaveNoticeStore } from '@/components/editor/useEditorSaveNoticeStore';
 
@@ -34,6 +35,11 @@ export function useEditorFileActions() {
             });
             markFileSaved(savedFile.id, savedFile.fileName);
             showSaveNotice('Saved');
+            const { loadProjects, selectProject } = useProjectStore.getState();
+            await Promise.all([
+                loadProjects(),
+                currentProjectId ? selectProject(currentProjectId) : Promise.resolve(),
+            ]);
             return savedFile;
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unable to save this file.';

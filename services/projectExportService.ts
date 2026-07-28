@@ -48,17 +48,7 @@ export const exportProjectAsZip = async (projectId: number): Promise<void> => {
         folder.file(fullRecord.file_name, code);
     }
 
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
-    const reader = new FileReader();
-    const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => {
-            const result = reader.result as string;
-            const base64Data = result.split(',')[1] || result;
-            resolve(base64Data);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(zipBlob);
-    });
+    const base64 = await zip.generateAsync({ type: 'base64' });
 
     const cacheDir = FileSystem.cacheDirectory;
     if (!cacheDir) {

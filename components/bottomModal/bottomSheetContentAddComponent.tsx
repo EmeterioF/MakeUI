@@ -17,11 +17,11 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }:
     const { fetchSuggestions, aiLoading } = useAiSuggestionStore();
 
     const addButtons = [
-        { label: 'VIEW', action: () => addNode(ViewDefault) },
-        { label: 'TEXT', action: () => addNode(TextDefault) },
-        { label: 'BUTTON', action: () => addNode(ButtonDefault) },
-        { label: 'IMAGE', action: () => addNode(ImageDefault) },
-        { label: 'SCROLLVIEW', action: () => addNode(ScrollViewDefault) },
+        { label: 'VIEW', action: () => { addNode(ViewDefault); } },
+        { label: 'TEXT', action: () => { addNode(TextDefault); } },
+        { label: 'BUTTON', action: () => { addNode(ButtonDefault); } },
+        { label: 'IMAGE', action: () => { addNode(ImageDefault); } },
+        { label: 'SCROLLVIEW', action: () => { addNode(ScrollViewDefault); } },
     ];
 
     return (

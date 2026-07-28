@@ -5,12 +5,6 @@ import { useHomeFileActions } from '@/components/home/useHomeFileActions';
 import { useProjectStore } from '@/editor/projectStore';
 import type { ProjectListItem } from '@/data/componentFileRepository';
 
-const formatDate = (value: string): string => {
-    const date = new Date(value.replace(' ', 'T'));
-    if (Number.isNaN(date.getTime())) return value;
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-};
-
 function ProjectListItem({ project, onOpen, onDelete }: {
     project: ProjectListItem;
     onOpen: (id: number) => void;
@@ -23,11 +17,11 @@ function ProjectListItem({ project, onOpen, onDelete }: {
             </View>
 
             <View style={styles.details}>
-                <Text style={styles.fileName} numberOfLines={1}>
+                <Text style={styles.fileName} numberOfLines={2}>
                     {project.name}
                 </Text>
                 <Text style={styles.meta} numberOfLines={1}>
-                    {project.screen_count} screen{project.screen_count !== 1 ? 's' : ''} · Updated {formatDate(project.updated_at)}
+                    {project.screen_count} screen{project.screen_count !== 1 ? 's' : ''}
                 </Text>
             </View>
 
@@ -38,7 +32,7 @@ function ProjectListItem({ project, onOpen, onDelete }: {
                     onDelete(project.id, project.name);
                 }}
             >
-                <Text style={styles.deleteText}>DEL</Text>
+                <Text style={styles.deleteText}>✕</Text>
             </Pressable>
         </Pressable>
     );
@@ -106,12 +100,16 @@ export default function HomeScreen() {
         <View style={styles.safeArea}>
             <View style={styles.header}>
                 <View style={styles.titleGroup}>
-                    <Text style={styles.title}>MakeUI</Text>
-                    <Text style={styles.subtitle}>
-                        {isProjectView
-                            ? 'Your projects'
-                            : `Project: ${projects.find(p => p.id === selectedProjectId)?.name ?? ''}`}
-                    </Text>
+                    {isProjectView ? (
+                        <>
+                            <Text style={styles.title}>Projects</Text>
+                            <Text style={styles.subtitle}>{projects.length} project{projects.length !== 1 ? 's' : ''}</Text>
+                        </>
+                    ) : (
+                        <Text style={styles.projectTitle} numberOfLines={1}>
+                            {projects.find(p => p.id === selectedProjectId)?.name ?? ''}
+                        </Text>
+                    )}
                 </View>
 
                 {isProjectView ? (
@@ -124,10 +122,10 @@ export default function HomeScreen() {
                 ) : (
                     <View style={styles.headerActions}>
                         <Pressable
-                            style={({ pressed }) => [styles.createButton, pressed && styles.pressed]}
+                            style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
                             onPress={() => selectProject(null)}
                         >
-                            <Text style={styles.createButtonText}>BACK</Text>
+                            <Text style={styles.iconButtonText}>←</Text>
                         </Pressable>
                         <Pressable
                             style={({ pressed }) => [styles.exportButton, pressed && styles.pressed]}
@@ -214,10 +212,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 14,
-        paddingHorizontal: 18,
-        paddingTop: 14,
-        paddingBottom: 16,
+        gap: 12,
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 14,
         borderBottomWidth: 1,
         borderBottomColor: '#E5E7EB',
         backgroundColor: '#FFFFFF',
@@ -225,21 +223,26 @@ const styles = StyleSheet.create({
     titleGroup: {
         flex: 1,
         minWidth: 0,
-        gap: 2,
     },
     title: {
         color: '#111827',
-        fontSize: 24,
-        fontWeight: '900',
+        fontSize: 20,
+        fontWeight: '800',
     },
     subtitle: {
-        color: '#6B7280',
+        color: '#9CA3AF',
         fontSize: 12,
-        fontWeight: '600',
+        fontWeight: '500',
+        marginTop: 1,
+    },
+    projectTitle: {
+        color: '#111827',
+        fontSize: 18,
+        fontWeight: '700',
     },
     createButton: {
-        minHeight: 42,
-        paddingHorizontal: 16,
+        minHeight: 36,
+        paddingHorizontal: 14,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 8,
@@ -248,11 +251,12 @@ const styles = StyleSheet.create({
     createButtonText: {
         color: '#FFFFFF',
         fontSize: 11,
-        fontWeight: '800',
+        fontWeight: '700',
+        letterSpacing: 0.3,
     },
     exportButton: {
-        minHeight: 42,
-        paddingHorizontal: 16,
+        minHeight: 36,
+        paddingHorizontal: 14,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 8,
@@ -261,7 +265,8 @@ const styles = StyleSheet.create({
     exportButtonText: {
         color: '#FFFFFF',
         fontSize: 11,
-        fontWeight: '800',
+        fontWeight: '700',
+        letterSpacing: 0.3,
     },
     pressed: {
         opacity: 0.84,
@@ -269,20 +274,33 @@ const styles = StyleSheet.create({
     },
     headerActions: {
         flexDirection: 'row',
-        gap: 10,
+        gap: 8,
+    },
+    iconButton: {
+        minWidth: 38,
+        minHeight: 38,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        backgroundColor: '#F3F4F6',
+    },
+    iconButtonText: {
+        color: '#374151',
+        fontSize: 16,
+        fontWeight: '600',
     },
     scroll: {
         flex: 1,
     },
     list: {
-        padding: 16,
-        gap: 10,
+        padding: 14,
+        gap: 8,
     },
     emptyState: {
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 220,
-        gap: 8,
+        minHeight: 200,
+        gap: 6,
         paddingHorizontal: 24,
     },
     emptyTitle: {
@@ -308,61 +326,57 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        minHeight: 72,
         paddingHorizontal: 14,
-        paddingVertical: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
+        paddingVertical: 14,
+        borderRadius: 10,
         backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        borderColor: '#F3F4F6',
     },
     rowPressed: {
-        opacity: 0.86,
-        transform: [{ scale: 0.99 }],
+        opacity: 0.8,
     },
     projectIcon: {
-        width: 42,
-        height: 42,
+        width: 40,
+        height: 40,
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 8,
-        backgroundColor: '#F3F4F6',
+        borderRadius: 10,
+        backgroundColor: '#F9FAFB',
     },
     projectIconText: {
-        fontSize: 22,
+        fontSize: 20,
     },
     details: {
         flex: 1,
         minWidth: 0,
-        gap: 5,
+        gap: 4,
     },
     fileName: {
         color: '#111827',
         fontSize: 15,
-        fontWeight: '800',
+        fontWeight: '700',
+        lineHeight: 20,
     },
     meta: {
-        color: '#6B7280',
+        color: '#9CA3AF',
         fontSize: 12,
         fontWeight: '500',
     },
     deleteButton: {
-        minWidth: 44,
-        minHeight: 34,
+        minWidth: 32,
+        minHeight: 32,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#FECACA',
-        backgroundColor: '#FEF2F2',
     },
     actionPressed: {
-        opacity: 0.82,
+        opacity: 0.6,
     },
     deleteText: {
-        color: '#B91C1C',
-        fontSize: 10,
-        fontWeight: '800',
+        color: '#D1D5DB',
+        fontSize: 12,
+        fontWeight: '600',
     },
     modalOverlay: {
         flex: 1,

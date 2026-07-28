@@ -94,6 +94,11 @@ export function useHomeFileActions() {
                         try {
                             await deleteComponentFile(id);
                             await refreshFiles();
+                            const { selectedProjectId, selectProject, loadProjects } = useProjectStore.getState();
+                            if (selectedProjectId !== null) {
+                                await selectProject(selectedProjectId);
+                            }
+                            await loadProjects();
                         } catch (error) {
                             const message = error instanceof Error ? error.message : 'Unable to delete this file.';
                             Alert.alert('Delete failed', message);
