@@ -24,6 +24,7 @@ export const BottomSheetModalComponent = forwardRef<BottomSheetModal, BottomShee
                 backdropComponent={undefined}
                 containerStyle={{ backgroundColor: 'transparent' }}
                 onDismiss={onDismiss}
+                animationConfigs={{ mass: 0.2, damping: 25, stiffness: 400 }}
             >
                 {children}
             </BottomSheetModal>
