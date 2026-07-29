@@ -6,10 +6,11 @@ type BottomSheetProps = {
     children: ReactNode;
     index?: number;
     snapPoints?: string[];
+    onDismiss?: () => void;
 };
 
 export const BottomSheetModalComponent = forwardRef<BottomSheetModal, BottomSheetProps>(
-    ({ children, index = 3, snapPoints }, ref) => {
+    ({ children, index = 3, snapPoints, onDismiss }, ref) => {
         const internalRef = useRef<BottomSheetModal>(null);
         useImperativeHandle(ref, () => internalRef.current!);
 
@@ -22,6 +23,7 @@ export const BottomSheetModalComponent = forwardRef<BottomSheetModal, BottomShee
                 enableOverDrag
                 backdropComponent={undefined}
                 containerStyle={{ backgroundColor: 'transparent' }}
+                onDismiss={onDismiss}
             >
                 {children}
             </BottomSheetModal>
