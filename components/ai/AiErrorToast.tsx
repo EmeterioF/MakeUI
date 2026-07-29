@@ -32,7 +32,7 @@ export function AiErrorToast({ message, onDismiss }: Props) {
 const styles = StyleSheet.create({
   toast: {
     position: 'absolute',
-    bottom: 300,
+    top: 20,
     left: 20,
     right: 20,
     backgroundColor: '#FF3B30',

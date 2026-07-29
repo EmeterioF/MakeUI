@@ -34,7 +34,7 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
 
   fetchSuggestions: async () => {
     const { componentTree, canvasConfig } = useComponentNodeStore.getState();
-
+    console.log("hit")
     if (!componentTree || componentTree.length === 0) {
       set({ aiError: 'No components to enhance. Add some components first.' });
       return;
