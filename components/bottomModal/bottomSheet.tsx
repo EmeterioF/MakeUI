@@ -23,13 +23,9 @@ export default function BottomSheet() {
 
     useEffect(() => {
         if (selectedID) {
-            addModalRef.current?.dismiss();
-            canvasSettingsModalRef.current?.dismiss();
             editModalRef.current?.present();
-            return;
         }
 
-        editModalRef.current?.dismiss();
         if (activeSheet === 'canvasSettings') {
             addModalRef.current?.dismiss();
             canvasSettingsModalRef.current?.present();
