@@ -18,22 +18,21 @@ export default function BottomSheet() {
     const deleteNode = useComponentNodeStore((s) => s.deleteNode);
 
     useEffect(() => {
-        addModalRef.current?.present();
-    }, []);
-
-    useEffect(() => {
         if (selectedID) {
+            canvasSettingsModalRef.current?.dismiss();
+            addModalRef.current?.dismiss();
             editModalRef.current?.present();
-        }
-
-        if (activeSheet === 'canvasSettings') {
+        } else if (activeSheet === 'canvasSettings') {
+            // No selection, canvas settings requested
+            editModalRef.current?.dismiss();
             addModalRef.current?.dismiss();
             canvasSettingsModalRef.current?.present();
         } else {
             canvasSettingsModalRef.current?.dismiss();
             addModalRef.current?.present();
         }
-    }, [activeSheet, selectedID]);
+    console.log(selectedID)
+}, [activeSheet, selectedID]);
 
     const handleBack = () => selectNode(null);
     const handleDelete = () => deleteNode(selectedID);
@@ -48,7 +47,7 @@ export default function BottomSheet() {
 
     return (
         <View>
-            <BottomSheetModalComponent ref={addModalRef} index={2}>
+            <BottomSheetModalComponent ref={addModalRef} index={4}>
                 <BottomSheetContentAddComponent onOpenCanvasSettings={handleOpenCanvasSettings} />
             </BottomSheetModalComponent>
 

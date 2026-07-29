@@ -76,7 +76,7 @@ export const getNodeStyle = (
     return {
         view: [viewBoxStyle, selection, dropTarget] as ViewStyle[],
         viewChildren: { flex: 1, ...flexLayout } as ViewStyle,
-        scrollView: [viewBoxStyle, selection, dropTarget] as ViewStyle[],
+        scrollView: [viewBoxStyle, dropTarget] as ViewStyle[],
         scrollViewContent: flexLayout,
         text: [nodeStyle, selection] as TextStyle[],
         button: [{ justifyContent: 'center', alignItems: 'center' }, nodeStyle, selection] as ViewStyle[],
