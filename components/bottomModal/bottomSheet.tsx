@@ -20,30 +20,23 @@ export default function BottomSheet() {
     useEffect(() => {
         if (selectedID) {
             canvasSettingsModalRef.current?.dismiss();
-            addModalRef.current?.dismiss();
             editModalRef.current?.present();
-        } else if (activeSheet === 'canvasSettings') {
-            // No selection, canvas settings requested
-            editModalRef.current?.dismiss();
-            addModalRef.current?.dismiss();
+        } 
+        
+        if (activeSheet === 'canvasSettings') {
             canvasSettingsModalRef.current?.present();
         } else {
-            canvasSettingsModalRef.current?.dismiss();
             addModalRef.current?.present();
         }
-    console.log(selectedID)
-}, [activeSheet, selectedID]);
+        console.log(activeSheet)
+    }, [activeSheet, selectedID]);
+
+    const handleOpenCanvasSettings = () => setActiveSheet('canvasSettings');
+    const handleCanvasSettingsBack = () => setActiveSheet('add');
 
     const handleBack = () => selectNode(null);
     const handleDelete = () => deleteNode(selectedID);
-    const handleOpenCanvasSettings = () => {
-        addModalRef.current?.dismiss();
-        setActiveSheet('canvasSettings');
-    };
-    const handleCanvasSettingsBack = () => {
-        canvasSettingsModalRef.current?.dismiss();
-        setActiveSheet('add');
-    };
+   
 
     return (
         <View>
