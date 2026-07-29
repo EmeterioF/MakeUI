@@ -46,14 +46,6 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }:
             <View style={styles.hr} />
 
             <View style={styles.fileRow}>
-                <Pressable
-                    style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
-                    onPress={saveAndGoHome}
-                    disabled={isSaving}
-                >
-                    <Text style={styles.backButtonText}>BACK</Text>
-                </Pressable>
-
                 <TextInput
                     value={currentFileName}
                     onChangeText={setCurrentFileName}
@@ -68,12 +60,19 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }:
             <View style={styles.utilityRow}>
 
                 <Pressable
+                    style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
+                    onPress={saveAndGoHome}
+                    disabled={isSaving}
+                >
+                    <Text style={styles.backButtonText}>BACK</Text>
+                </Pressable>
+
+                <Pressable
                     style={({ pressed }) => [styles.canvasButton, pressed && styles.buttonPressed]}
                     onPress={onOpenCanvasSettings}
                 >
                     <Text style={styles.canvasButtonText}>CANVAS SETTINGS</Text>
                 </Pressable>
-
 
                 <Pressable
                     style={({ pressed }) => [styles.shareButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
