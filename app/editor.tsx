@@ -5,9 +5,9 @@ import ComponentRenderer from '@/renderer/componentRenderer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from '@/components/bottomModal/bottomSheet';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { FloatingSaveToast } from '@/components/editor/FloatingSaveToast';
 import { AiPreviewOverlay } from '@/components/ai/AiPreviewOverlay';
 import { AiLoadingIndicator } from '@/components/ai/AiLoadingIndicator';
+import { useAutoSave } from '@/components/editor/useAutoSave';
 import { AiErrorToast } from '@/components/ai/AiErrorToast';
 import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
 
@@ -15,6 +15,8 @@ export default function EditorScreen() {
     const componentTree = useComponentNodeStore((s) => s.componentTree);
     const canvasConfig = useComponentNodeStore((s) => s.canvasConfig);
     const { aiLoading, aiError } = useAiSuggestionStore();
+
+    useAutoSave();
 
     return (
         <GestureHandlerRootView style={styles.container}>
@@ -39,7 +41,6 @@ export default function EditorScreen() {
                 </View>
 
                 <BottomSheet />
-                <FloatingSaveToast />
                 <AiPreviewOverlay />
                 <AiLoadingIndicator visible={aiLoading} />
                 <AiErrorToast message={aiError} onDismiss={() => useAiSuggestionStore.setState({ aiError: null })} />

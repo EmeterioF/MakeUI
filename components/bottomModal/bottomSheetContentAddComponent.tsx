@@ -13,7 +13,7 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }:
     const addNode = useComponentNodeStore((s) => s.addNode);
     const currentFileName = useComponentNodeStore((s) => s.currentFileName);
     const setCurrentFileName = useComponentNodeStore((s) => s.setCurrentFileName);
-    const { isSaving, saveCurrentFile, saveAndGoHome, saveAndShare } = useEditorFileActions();
+    const { isSaving, saveAndGoHome, saveAndShare } = useEditorFileActions();
     const { fetchSuggestions, aiLoading } = useAiSuggestionStore();
 
     const addButtons = [
@@ -74,13 +74,6 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }:
                     <Text style={styles.canvasButtonText}>CANVAS SETTINGS</Text>
                 </Pressable>
 
-                <Pressable
-                    style={({ pressed }) => [styles.saveButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
-                    onPress={saveCurrentFile}
-                    disabled={isSaving}
-                >
-                    <Text style={styles.saveButtonText}>{isSaving ? 'SAVING' : 'SAVE'}</Text>
-                </Pressable>
 
                 <Pressable
                     style={({ pressed }) => [styles.shareButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
@@ -140,22 +133,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '600',
         backgroundColor: '#FFFFFF',
-    },
-    saveButton: {
-        minHeight: 40,
-        minWidth: 86,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#86EFAC',
-        backgroundColor: '#DCFCE7',
-        paddingHorizontal: 14,
-    },
-    saveButtonText: {
-        color: '#166534',
-        fontSize: 11,
-        fontWeight: '800',
     },
     backButton: {
         minHeight: 40,

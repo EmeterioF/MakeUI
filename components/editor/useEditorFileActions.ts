@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import { useProjectStore } from '@/editor/projectStore';
 import { saveComponentFile, shareComponentFileById } from '@/services/componentFileService';
-import { useEditorSaveNoticeStore } from '@/components/editor/useEditorSaveNoticeStore';
 
 export function useEditorFileActions() {
     const currentFileId = useComponentNodeStore((s) => s.currentFileId);
@@ -13,7 +12,6 @@ export function useEditorFileActions() {
     const canvasConfig = useComponentNodeStore((s) => s.canvasConfig);
     const currentProjectId = useComponentNodeStore((s) => s.currentProjectId);
     const markFileSaved = useComponentNodeStore((s) => s.markFileSaved);
-    const showSaveNotice = useEditorSaveNoticeStore((s) => s.showSaveNotice);
     const [isSaving, setIsSaving] = useState(false);
     const savingRef = useRef(false);
 
@@ -34,7 +32,6 @@ export function useEditorFileActions() {
                 projectId: currentProjectId ?? undefined,
             });
             markFileSaved(savedFile.id, savedFile.fileName);
-            showSaveNotice('Saved');
             const { loadProjects, selectProject } = useProjectStore.getState();
             await Promise.all([
                 loadProjects(),
@@ -49,7 +46,7 @@ export function useEditorFileActions() {
             savingRef.current = false;
             setIsSaving(false);
         }
-    }, [canvasConfig, componentTree, currentFileId, currentFileName, currentProjectId, markFileSaved, showSaveNotice]);
+    }, [canvasConfig, componentTree, currentFileId, currentFileName, currentProjectId, markFileSaved]);
 
     const saveAndGoHome = useCallback(async () => {
         const savedFile = await saveCurrentFile();
