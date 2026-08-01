@@ -24,43 +24,6 @@ interface AiSuggestionState {
   togglePreview: () => void;
 }
 
-function restoreOriginalColors(
-  originalTree: ComponentNode[],
-  suggestedTree: ComponentNode[],
-  label: string,
-): ComponentNode[] {
-  if (label === 'Visual Polish' || label === 'Balanced') {
-    return suggestedTree;
-  }
-
-  const idMap = new Map<string, ComponentNode>();
-  const buildIdMap = (nodes: ComponentNode[]) => {
-    for (const node of nodes) {
-      idMap.set(node.id, node);
-      if (node.children) buildIdMap(node.children);
-    }
-  };
-  buildIdMap(originalTree);
-
-  const restore = (nodes: ComponentNode[]): ComponentNode[] =>
-    nodes.map((node) => {
-      const original = idMap.get(node.id);
-      if (!original) return node;
-      return {
-        ...node,
-        style: {
-          ...node.style,
-          backgroundColor: original.style.backgroundColor,
-          color: original.style.color,
-          borderColor: original.style.borderColor,
-        },
-        children: node.children ? restore(node.children) : undefined,
-      };
-    });
-
-  return restore(suggestedTree);
-}
-
 export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
   aiSuggestions: null,
   aiOriginalTree: null,
@@ -83,13 +46,8 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
       const result = await generateLayoutSuggestions(componentTree, canvasConfig);
       console.log('[AiStore] result keys:', Object.keys(result), 'suggestions count:', result.suggestions?.length)
 
-      const processedSuggestions = result.suggestions.map((s: AiSuggestion) => ({
-        ...s,
-        componentTree: restoreOriginalColors(componentTree, s.componentTree, s.label),
-      }));
-
       set({
-        aiSuggestions: processedSuggestions,
+        aiSuggestions: result.suggestions,
         aiOriginalTree: componentTree,
         selectedIndex: 0,
         showAiPreview: true,
