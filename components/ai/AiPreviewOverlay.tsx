@@ -21,11 +21,11 @@ export function AiPreviewOverlay() {
   const scrollRef = useRef<ScrollView>(null);
   const [showInfo, setShowInfo] = useState(false);
 
+  if (!showAiPreview || !aiSuggestions) return null;
+
   const currentImprovements = selectedIndex > 0
     ? (aiSuggestions[selectedIndex - 1]?.improvements ?? [])
     : [];
-
-  if (!showAiPreview || !aiSuggestions) return null;
 
   const totalPages = 1 + aiSuggestions.length;
   const currentLabel = selectedIndex === 0

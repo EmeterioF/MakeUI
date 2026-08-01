@@ -3,7 +3,7 @@ import { ComponentNode, CanvasConfig } from '@/editor/componentNodeTypes'
 const BACKEND_URL = process.env.EXPO_PUBLIC_AI_BACKEND_URL || 'http://localhost:3000'
 const AUTH_TOKEN = process.env.EXPO_PUBLIC_AI_AUTH_TOKEN
 
-const TIMEOUT_MS = 30_000
+const TIMEOUT_MS = 60_000
 
 interface AiLayoutMultiResponse {
   suggestions: Array<{
