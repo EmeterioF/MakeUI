@@ -10,11 +10,14 @@ import { AiLoadingIndicator } from '@/components/ai/AiLoadingIndicator';
 import { useAutoSave } from '@/components/editor/useAutoSave';
 import { AiErrorToast } from '@/components/ai/AiErrorToast';
 import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
+import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
+import { useTutorial } from '@/hooks/useTutorial';
 
 export default function EditorScreen() {
     const componentTree = useComponentNodeStore((s) => s.componentTree);
     const canvasConfig = useComponentNodeStore((s) => s.canvasConfig);
     const { aiLoading, aiError } = useAiSuggestionStore();
+    const { visible: tutorialVisible, showTutorial, dismissTutorial } = useTutorial();
 
     useAutoSave();
 
@@ -40,10 +43,11 @@ export default function EditorScreen() {
                     ))}
                 </View>
 
-                <BottomSheet />
+                <BottomSheet onOpenTutorial={showTutorial} />
                 <AiPreviewOverlay />
                 <AiLoadingIndicator visible={aiLoading} />
                 <AiErrorToast message={aiError} onDismiss={() => useAiSuggestionStore.setState({ aiError: null })} />
+                <TutorialOverlay visible={tutorialVisible} onDismiss={dismissTutorial} />
             </BottomSheetModalProvider>
         </GestureHandlerRootView>
     );

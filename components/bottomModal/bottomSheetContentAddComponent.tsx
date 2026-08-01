@@ -7,9 +7,10 @@ import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
 
 type Props = {
     onOpenCanvasSettings: () => void;
+    onOpenTutorial: () => void;
 };
 
-export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }: Props) {
+export default function BottomSheetContentAddComponent({ onOpenCanvasSettings, onOpenTutorial }: Props) {
     const addNode = useComponentNodeStore((s) => s.addNode);
     const currentFileName = useComponentNodeStore((s) => s.currentFileName);
     const setCurrentFileName = useComponentNodeStore((s) => s.setCurrentFileName);
@@ -80,6 +81,13 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings }:
                     disabled={isSaving}
                 >
                     <Text style={styles.shareButtonText}>SHARE</Text>
+                </Pressable>
+
+                <Pressable
+                    style={({ pressed }) => [styles.helpButton, pressed && styles.buttonPressed]}
+                    onPress={onOpenTutorial}
+                >
+                    <Text style={styles.helpButtonText}>?</Text>
                 </Pressable>
 
             </View>
@@ -179,6 +187,22 @@ const styles = StyleSheet.create({
     shareButtonText: {
         color: '#1D4ED8',
         fontSize: 11,
+        fontWeight: '800',
+    },
+    helpButton: {
+        minHeight: 40,
+        minWidth: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#D1D5DB',
+        backgroundColor: '#F3F4F6',
+        paddingHorizontal: 12,
+    },
+    helpButtonText: {
+        color: '#374151',
+        fontSize: 16,
         fontWeight: '800',
     },
     addSection: {
