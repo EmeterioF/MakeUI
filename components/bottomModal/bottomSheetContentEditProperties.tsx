@@ -39,7 +39,7 @@ export default function BottomSheetContentEditProperties({ onBack, onDelete }: P
         <BottomSheetScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
             <View style={styles.actionContainer}>
                 <Pressable onPress={onBack} style={styles.buttonSecondary}>
-                    <Text style={styles.buttonText}>BACK</Text>
+                    <Text style={styles.buttonText}>← BACK</Text>
                 </Pressable>
                 <Pressable onPress={onDelete} style={styles.buttonDanger}>
                     <Text style={styles.buttonTextDanger}>DEL</Text>

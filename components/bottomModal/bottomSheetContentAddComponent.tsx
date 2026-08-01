@@ -29,8 +29,8 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings, o
         <BottomSheetScrollView style={styles.scroll} contentContainerStyle={styles.container}>
 
             <View style={styles.addSection}>
-                <Text style={styles.sectionTitle}>Add Component</Text>
-                <View style={styles.buttonRow}>
+                <Text style={styles.sectionLabel}>ADD COMPONENT</Text>
+                <View style={styles.buttonGrid}>
                     {addButtons.map(({ label, action }) => (
                         <Pressable
                             key={label}
@@ -44,7 +44,6 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings, o
                     ))}
                 </View>
             </View>
-            <View style={styles.hr} />
 
             <View style={styles.fileRow}>
                 <TextInput
@@ -59,48 +58,45 @@ export default function BottomSheetContentAddComponent({ onOpenCanvasSettings, o
             </View>
 
             <View style={styles.utilityRow}>
-
                 <Pressable
-                    style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
-                    onPress={saveAndGoHome}
-                    disabled={isSaving}
-                >
-                    <Text style={styles.backButtonText}>BACK</Text>
-                </Pressable>
-
-                <Pressable
-                    style={({ pressed }) => [styles.canvasButton, pressed && styles.buttonPressed]}
+                    style={({ pressed }) => [styles.utilityBtn, pressed && styles.buttonPressed]}
                     onPress={onOpenCanvasSettings}
                 >
-                    <Text style={styles.canvasButtonText}>CANVAS SETTINGS</Text>
+                    <Text style={styles.utilityBtnText} numberOfLines={1}>CANVAS SETTINGS</Text>
                 </Pressable>
-
                 <Pressable
-                    style={({ pressed }) => [styles.shareButton, pressed && styles.buttonPressed, isSaving && styles.disabled]}
+                    style={({ pressed }) => [styles.utilityBtn, pressed && styles.buttonPressed, isSaving && styles.disabled]}
                     onPress={saveAndShare}
                     disabled={isSaving}
                 >
-                    <Text style={styles.shareButtonText}>SHARE</Text>
+                    <Text style={styles.utilityBtnText} numberOfLines={1}>SHARE</Text>
                 </Pressable>
-
-                <Pressable
-                    style={({ pressed }) => [styles.helpButton, pressed && styles.buttonPressed]}
-                    onPress={onOpenTutorial}
-                >
-                    <Text style={styles.helpButtonText}>?</Text>
-                </Pressable>
-
             </View>
 
-            <View style={styles.aiSection}>
+            <Pressable
+                style={({ pressed }) => [styles.enhanceBtn, pressed && styles.buttonPressed, aiLoading && styles.enhanceBtnDisabled, isSaving && styles.disabled]}
+                onPress={fetchSuggestions}
+                disabled={aiLoading || isSaving}
+            >
+                <Text style={styles.enhanceBtnText}>
+                    {aiLoading ? 'ENHANCING…' : 'ENHANCE LAYOUT'}
+                </Text>
+            </Pressable>
+
+            <View style={styles.footerRow}>
                 <Pressable
-                    style={[styles.enhanceBtn, aiLoading && styles.enhanceBtnDisabled]}
-                    onPress={fetchSuggestions}
-                    disabled={aiLoading}
+                    style={({ pressed }) => [styles.footerBack, pressed && styles.pressedFooter]}
+                    onPress={saveAndGoHome}
+                    disabled={isSaving}
                 >
-                    <Text style={styles.enhanceBtnText}>
-                        {aiLoading ? 'ENHANCING...' : 'ENHANCE LAYOUT'}
-                    </Text>
+                    <Text style={styles.footerBackText}>BACK</Text>
+                </Pressable>
+                <Pressable
+                    style={({ pressed }) => [styles.footerHelp, pressed && styles.pressedFooter]}
+                    onPress={onOpenTutorial}
+                    accessibilityLabel="Open tutorial"
+                >
+                    <Text style={styles.footerHelpText}>?</Text>
                 </Pressable>
             </View>
         </BottomSheetScrollView>
@@ -114,26 +110,49 @@ const styles = StyleSheet.create({
     container: {
         width: '100%',
         paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 12,
+        paddingTop: 10,
+        paddingBottom: 24,
         gap: 14,
+    },
+    addSection: {
+        gap: 10,
+    },
+    sectionLabel: {
+        fontSize: 11,
+        fontWeight: '700',
+        letterSpacing: 0.8,
+        color: '#9CA3AF',
+    },
+    buttonGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    addButton: {
+        flexGrow: 1,
+        flexBasis: '30%',
+        minHeight: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 10,
+        backgroundColor: '#111827',
+    },
+    addButtonText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: '700',
+        letterSpacing: 0.3,
     },
     fileRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
-    },
-    utilityRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 10,
     },
     fileNameInput: {
         flex: 1,
         minWidth: 0,
-        minHeight: 40,
-        paddingHorizontal: 12,
-        borderRadius: 8,
+        minHeight: 44,
+        paddingHorizontal: 14,
+        borderRadius: 10,
         borderWidth: 1,
         borderColor: '#E5E7EB',
         color: '#111827',
@@ -141,128 +160,81 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         backgroundColor: '#FFFFFF',
     },
-    backButton: {
-        minHeight: 40,
-        minWidth: 76,
+    utilityRow: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    utilityBtn: {
+        flex: 1,
+        minHeight: 44,
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 8,
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: '#C4B5FD',
-        backgroundColor: '#EDE9FE',
-        paddingHorizontal: 12,
-    },
-    backButtonText: {
-        color: '#5B21B6',
-        fontSize: 11,
-        fontWeight: '800',
-    },
-    canvasButton: {
-        minHeight: 40,
-        minWidth: 76,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#FDBA74',
-        backgroundColor: '#FFEDD5',
-        paddingHorizontal: 12,
-    },
-    canvasButtonText: {
-        color: '#9A3412',
-        fontSize: 11,
-        fontWeight: '800',
-    },
-    shareButton: {
-        minHeight: 40,
-        minWidth: 76,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#93C5FD',
-        backgroundColor: '#DBEAFE',
-        paddingHorizontal: 12,
-    },
-    shareButtonText: {
-        color: '#1D4ED8',
-        fontSize: 11,
-        fontWeight: '800',
-    },
-    helpButton: {
-        minHeight: 40,
-        minWidth: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#D1D5DB',
+        borderColor: '#E5E7EB',
         backgroundColor: '#F3F4F6',
-        paddingHorizontal: 12,
+        paddingHorizontal: 8,
     },
-    helpButtonText: {
+    utilityBtnText: {
+        color: '#374151',
+        fontSize: 12,
+        fontWeight: '700',
+        letterSpacing: 0.3,
+    },
+    enhanceBtn: {
+        borderRadius: 10,
+        paddingVertical: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#007AFF',
+    },
+    enhanceBtnDisabled: {
+        backgroundColor: '#94B8E6',
+    },
+    enhanceBtnText: {
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: 14,
+        letterSpacing: 0.5,
+    },
+    footerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    footerBack: {
+        minHeight: 32,
+        paddingHorizontal: 4,
+        justifyContent: 'center',
+    },
+    footerBackText: {
+        color: '#6B7280',
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    footerHelp: {
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 8,
+        backgroundColor: '#F3F4F6',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    footerHelpText: {
         color: '#374151',
         fontSize: 16,
-        fontWeight: '800',
-    },
-    addSection: {
-        gap: 10,
-    },
-    sectionTitle: {
-        fontSize: 13,
         fontWeight: '700',
-        color: '#111827',
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 10,
-    },
-    addButton: {
-        minHeight: 40,
-        minWidth: 72,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 10,
-        paddingHorizontal: 14,
-        borderRadius: 8,
-        backgroundColor: '#111827',
-        borderWidth: 1,
-        borderColor: '#111827',
     },
     buttonPressed: {
         opacity: 0.85,
         transform: [{ scale: 0.97 }],
     },
-    addButtonText: {
-        color: '#FFFFFF',
-        fontSize: 12,
-        fontWeight: '700',
+    pressedFooter: {
+        opacity: 0.7,
     },
     disabled: {
         opacity: 0.6,
-    },
-    hr: {
-        borderBottomColor: 'gray',
-        borderBottomWidth: StyleSheet.hairlineWidth, // Creates a thin line based on screen density
-        marginVertical: 10,
-    },
-    aiSection: {
-        marginTop: 16,
-        paddingHorizontal: 16,
-    },
-    enhanceBtn: {
-        backgroundColor: '#007AFF',
-        borderRadius: 8,
-        paddingVertical: 12,
-        alignItems: 'center',
-    },
-    enhanceBtnDisabled: {
-        backgroundColor: '#ccc',
-    },
-    enhanceBtnText: {
-        color: '#fff',
-        fontWeight: '600',
-        fontSize: 14,
     },
 });

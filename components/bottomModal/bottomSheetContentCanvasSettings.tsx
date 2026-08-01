@@ -14,8 +14,11 @@ export default function BottomSheetContentCanvasSettings({ onBack }: Props) {
     return (
         <BottomSheetScrollView style={styles.scroll} contentContainerStyle={styles.container}>
             <View style={styles.headerRow}>
-                <Pressable style={({ pressed }) => [styles.backButton, pressed && styles.pressed]} onPress={onBack}>
-                    <Text style={styles.backButtonText}>BACK</Text>
+                <Pressable
+                    style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]}
+                    onPress={onBack}
+                >
+                    <Text style={styles.backBtnText}>BACK</Text>
                 </Pressable>
                 <Text style={styles.title}>Canvas Settings</Text>
             </View>
@@ -84,8 +87,8 @@ const styles = StyleSheet.create({
     container: {
         width: '100%',
         paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 12,
+        paddingTop: 10,
+        paddingBottom: 24,
         gap: 14,
     },
     headerRow: {
@@ -93,42 +96,38 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 10,
     },
-    backButton: {
-        minHeight: 40,
-        minWidth: 76,
-        alignItems: 'center',
+    backBtn: {
+        minHeight: 32,
+        paddingHorizontal: 4,
         justifyContent: 'center',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#C4B5FD',
-        backgroundColor: '#EDE9FE',
     },
-    backButtonText: {
-        color: '#5B21B6',
-        fontSize: 11,
-        fontWeight: '800',
+    backBtnText: {
+        color: '#6B7280',
+        fontSize: 13,
+        fontWeight: '600',
     },
     title: {
         flex: 1,
         color: '#111827',
         fontSize: 16,
-        fontWeight: '800',
+        fontWeight: '700',
     },
     canvasSection: {
         borderWidth: 1,
         borderColor: '#E5E7EB',
-        borderRadius: 8,
-        padding: 12,
+        borderRadius: 12,
+        padding: 14,
         gap: 12,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#F9FAFB',
     },
     settingRow: {
         gap: 6,
     },
     settingLabel: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#4B5563',
+        fontSize: 11,
+        fontWeight: '700',
+        letterSpacing: 0.6,
+        color: '#6B7280',
     },
     segmentedContainer: {
         flexDirection: 'row',
@@ -136,24 +135,25 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     segmentedItem: {
-        paddingVertical: 6,
-        paddingHorizontal: 10,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
         borderRadius: 8,
-        backgroundColor: '#F3F4F6',
+        backgroundColor: '#FFFFFF',
         borderWidth: 1,
         borderColor: '#E5E7EB',
     },
     segmentedItemActive: {
-        backgroundColor: '#FFEDD5',
-        borderColor: '#FDBA74',
+        backgroundColor: '#111827',
+        borderColor: '#111827',
     },
     segmentedText: {
         color: '#374151',
-        fontSize: 11,
+        fontSize: 12,
         fontWeight: '600',
     },
     segmentedTextActive: {
-        color: '#9A3412',
+        color: '#FFFFFF',
+        fontWeight: '700',
     },
     pressed: {
         opacity: 0.85,

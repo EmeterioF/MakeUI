@@ -7,7 +7,7 @@ import BottomSheetContentAddComponent from '@/components/bottomModal/bottomSheet
 import BottomSheetContentCanvasSettings from '@/components/bottomModal/bottomSheetContentCanvasSettings';
 import BottomSheetContentEditProperties from '@/components/bottomModal/bottomSheetContentEditProperties';
 
-const SNAP_INDEX = { add: 4, canvasSettings: 5, edit: 8 } as const;
+const SNAP_INDEX = { add: 5, canvasSettings: 5, edit: 8 } as const;
 
 export default function BottomSheet({ onOpenTutorial }: { onOpenTutorial: () => void }) {
     const sheetRef = useRef<BottomSheetModal>(null);

@@ -38,12 +38,15 @@ export const editPropsStyles = StyleSheet.create({
     },
     buttonText: {
         fontSize: 13,
-        fontWeight: '500',
-        color: '#111827',
+        fontWeight: '700',
+        color: '#374151',
+        letterSpacing: 0.5,
     },
     buttonTextDanger: {
         fontSize: 16,
+        fontWeight: '800',
         color: '#B91C1C',
+        letterSpacing: 0.5,
     },
     headerTabs: {
         justifyContent: 'flex-start',
