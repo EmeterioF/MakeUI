@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MakeUI Coin Flip Frame Exporter</title>
+<!--
+  THROWAWAY TOOLING — not shipped with the app.
+
+  What it does:
+    Renders one full Y-rotation of a 3D MakeUI coin (rounded black metal
+    tile, logo artwork on both faces, studio lighting) and composites
+    64 frames into ONE 4096x4096 sprite sheet for the splash screen.
+
+  How to use:
+    1. Serve the MakeUI repo root over HTTP (plain file:// will NOT work
+       because the page must fetch assets/logo.jpg same-origin):
+         cd C:\Users\Alonzo\Projects\MakeUI
+         npx serve
+    2. Open http://localhost:3000/tools/coin-frame-exporter.html in Chrome.
+    3. Click "Render sprite". After a few seconds coin-sprite.png downloads.
+    4. Move it to  assets/splash/coin-sprite.png  (create the folder).
+    5. Tell the dev the sprite is in place so splash playback can be wired.
+
+  Sprite layout (playback contract — keep in sync with AnimatedSplash):
+    64 frames, row-major, 8 columns x 8 rows, each cell 512x512.
+    frameAngle(i) = (i / 64) * 360 degrees around Y, i = 0..63.
+
+  Tuning knobs (edit constants below, re-click Render):
+    TILE / TILE_RADIUS .... coin proportions (radius matches the 20px app frame)
+    EDGE_THICKNESS ........ coin rim depth
+    FACE_METALNESS/ROUGH .. face material (lower metalness keeps logo readable)
+    CORE_METALNESS/ROUGH .. rim material (high metalness = chrome edge)
+    KEY_INTENSITY / RIM_INTENSITY / AMBIENT .. studio lighting
+    FRAME_COUNT / CELL ..... sprite resolution (must stay 8x8 grid if changed)
+-->
+<style>
+  body { font-family: system-ui, sans-serif; background: #111; color: #eee;
+         display: flex; flex-direction: column; align-items: center; gap: 12px;
+         margin: 0; padding: 24px; }
+  #stage { background: #fff; border-radius: 12px; }
+  button { font-size: 16px; padding: 10px 28px; border-radius: 8px; border: 0;
+           background: #0EA5E9; color: #fff; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  #status { min-height: 1.4em; color: #9CA3AF; }
+  canvas#preview { width: 360px; height: 360px; background: #fff; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<h2>MakeUI Coin Flip Frame Exporter</h2>
+<canvas id="preview"></canvas>
+<div id="status">Loading logo…</div>
+<button id="render" disabled>Render sprite (64 frames)</button>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// ---- tuning knobs ----
+const TILE = 1.8;             // coin face size in scene units
+const TILE_RADIUS = 0.2;      // corner radius (matches ~20px app frame)
+const EDGE_THICKNESS = 0.14;  // rim depth
+const FACE_METALNESS = 0.35;  // keep low-ish so the logo stays readable
+const FACE_ROUGHNESS = 0.45;
+const CORE_METALNESS = 0.95;  // chrome rim
+const CORE_ROUGHNESS = 0.3;
+const KEY_INTENSITY = 1.6;
+const RIM_INTENSITY = 1.1;
+const FRAME_COUNT = 64;
+const COLS = 8;
+const CELL = 512;
+// ----------------------
+
+const statusEl = document.getElementById('status');
+const renderBtn = document.getElementById('render');
+const setStatus = (t) => { statusEl.textContent = t; };
+
+function roundedRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function makeFaceTexture(logoImg) {
+  const S = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const ctx = c.getContext('2d');
+  // black rounded tile
+  roundedRectPath(ctx, 0, 0, S, S, S * (TILE_RADIUS / TILE));
+  ctx.fillStyle = '#0B0B0C';
+  ctx.fill();
+  // logo artwork clipped inside the tile with a small inset
+  const inset = S * 0.055;
+  ctx.save();
+  roundedRectPath(ctx, inset, inset, S - inset * 2, S - inset * 2, S * (TILE_RADIUS / TILE));
+  ctx.clip();
+  const side = Math.min(logoImg.width, logoImg.height);
+  ctx.drawImage(
+    logoImg,
+    (logoImg.width - side) / 2, (logoImg.height - side) / 2, side, side,
+    inset, inset, S - inset * 2, S - inset * 2
+  );
+  ctx.restore();
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+function makeShadowTexture() {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 64;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(128, 32, 8, 128, 32, 120);
+  g.addColorStop(0, 'rgba(0,0,0,0.55)');
+  g.addColorStop(0.6, 'rgba(0,0,0,0.22)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.save();
+  ctx.translate(128, 32); ctx.scale(1, 0.25); ctx.translate(-128, -128);
+  ctx.fillRect(0, 0, 256, 256);
+  ctx.restore();
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+let renderer, scene, camera, coin, faceMat, ready = false;
+
+async function init() {
+  const logoImg = new Image();
+  logoImg.src = '../assets/logo.jpg';
+  await logoImg.decode();
+
+  const preview = document.getElementById('preview');
+  renderer = new THREE.WebGLRenderer({ canvas: preview, antialias: true,
+                                       alpha: true, preserveDrawingBuffer: true });
+  renderer.setSize(512, 512, false);
+  renderer.setPixelRatio(1);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+
+  scene = new THREE.Scene();
+  // NOTE: background intentionally left transparent so the exported cells
+  // composite over pure #fff in the export loop below. Do NOT set
+  // scene.background (ACES tone mapping would tint it off-white and the
+  // frames would seam against the app's #FFFFFF splash overlay).
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
+  camera.position.set(0, 0.15, 4.3);
+  camera.lookAt(0, -0.1, 0);
+
+  const key = new THREE.DirectionalLight('#ffffff', KEY_INTENSITY);
+  key.position.set(2.5, 3.5, 4);
+  scene.add(key);
+  const rim = new THREE.DirectionalLight('#dbeafe', RIM_INTENSITY);
+  rim.position.set(-3.5, 1.5, -2.5);
+  scene.add(rim);
+  scene.add(new THREE.AmbientLight('#ffffff', 0.25));
+
+  coin = new THREE.Group();
+
+  const core = new THREE.Mesh(
+    new RoundedBoxGeometry(TILE, TILE, EDGE_THICKNESS, 4, TILE_RADIUS),
+    new THREE.MeshStandardMaterial({ color: '#101013',
+      metalness: CORE_METALNESS, roughness: CORE_ROUGHNESS })
+  );
+  coin.add(core);
+
+  const faceTex = makeFaceTexture(logoImg);
+  faceMat = new THREE.MeshStandardMaterial({ map: faceTex, transparent: true,
+    metalness: FACE_METALNESS, roughness: FACE_ROUGHNESS });
+  const z = EDGE_THICKNESS / 2 + 0.002;
+  const front = new THREE.Mesh(new THREE.PlaneGeometry(TILE, TILE), faceMat);
+  front.position.z = z;
+  const back = front.clone();
+  back.position.z = -z;
+  back.rotation.y = Math.PI;
+  coin.add(front, back);
+  coin.position.y = 0.18;
+  scene.add(coin);
+
+  const shadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.0, 0.5),
+    new THREE.MeshBasicMaterial({ map: makeShadowTexture(), transparent: true, depthWrite: false })
+  );
+  shadow.position.y = -1.02;
+  scene.add(shadow);
+
+  renderer.render(scene, camera);
+  ready = true;
+  renderBtn.disabled = false;
+  setStatus('Ready. Click Render sprite.');
+}
+
+renderBtn.addEventListener('click', async () => {
+  if (!ready) return;
+  renderBtn.disabled = true;
+  const sprite = document.createElement('canvas');
+  sprite.width = sprite.height = COLS * CELL;
+  const sctx = sprite.getContext('2d');
+  const frame = document.createElement('canvas');
+  frame.width = frame.height = CELL;
+  for (let i = 0; i < FRAME_COUNT; i++) {
+    coin.rotation.y = (i / FRAME_COUNT) * Math.PI * 2;
+    renderer.render(scene, camera);
+    // downscale renderer output into the frame, then blit into the grid
+    const fctx = frame.getContext('2d');
+    fctx.fillStyle = '#ffffff';
+    fctx.fillRect(0, 0, CELL, CELL);
+    fctx.drawImage(renderer.domElement, 0, 0, CELL, CELL);
+    sctx.drawImage(frame, (i % COLS) * CELL, Math.floor(i / COLS) * CELL);
+    setStatus(`Rendering frame ${i + 1} / ${FRAME_COUNT}…`);
+    await new Promise((r) => requestAnimationFrame(r));
+  }
+  setStatus('Encoding PNG…');
+  sprite.toBlob((blob) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'coin-sprite.png';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    setStatus('Done. Move coin-sprite.png to assets/splash/coin-sprite.png');
+    renderBtn.disabled = false;
+  }, 'image/png');
+});
+
+init().catch((e) => setStatus('Failed to load: ' + e.message));
+</script>
+</body>
+</html>
