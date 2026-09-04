@@ -7,11 +7,14 @@ import Animated, {
     useSharedValue,
     withTiming,
 } from 'react-native-reanimated';
+import * as SplashScreen from 'expo-splash-screen';
 
 const FLIP_DEGREES = 720;
 const FLIP_DURATION_MS = 1600;
 const FADE_DURATION_MS = 200;
+const REDUCED_MOTION_HOLD_MS = 1000;
 const REDUCED_MOTION_FADE_MS = 300;
+const MIN_VISIBLE_MS = FLIP_DURATION_MS + FADE_DURATION_MS;
 
 type Props = {
     onDone: () => void;
@@ -21,15 +24,24 @@ export default function AnimatedSplash({ onDone }: Props) {
     const rotation = useSharedValue(0);
     const opacity = useSharedValue(1);
     const doneRef = useRef(false);
+    const mountTimeRef = useRef(0);
     const onDoneRef = useRef(onDone);
     onDoneRef.current = onDone;
 
-    function finish(caller: string) {
+    function complete() {
         if (doneRef.current) return;
         doneRef.current = true;
-         
-        console.log(`[splash] finish caller=${caller}`);
         onDoneRef.current();
+    }
+
+    function finish() {
+        if (doneRef.current) return;
+        const remaining = MIN_VISIBLE_MS - (Date.now() - mountTimeRef.current);
+        if (remaining > 0) {
+            setTimeout(complete, remaining);
+        } else {
+            complete();
+        }
     }
 
     const flipStyle = useAnimatedStyle(() => ({
@@ -41,51 +53,42 @@ export default function AnimatedSplash({ onDone }: Props) {
     }));
 
     useEffect(() => {
-        const mountTime = Date.now();
-         
-        console.log('[splash] mounted');
+        mountTimeRef.current = Date.now();
+        // Reveal this overlay immediately. The native splash sits on top of
+        // all JS views, so the flip would otherwise play invisibly beneath it.
+        void SplashScreen.hideAsync().catch(() => {});
 
-        function fadeOutAndFinish(duration: number, reason: string) {
-             
-            console.log(`[splash] fadeOut start reason=${reason} elapsed=${Date.now() - mountTime}ms`);
+        function fadeOutAndFinish(duration: number) {
             opacity.value = withTiming(0, { duration }, (finished) => {
-                 
-                console.log(`[splash] fade complete finished=${finished}`);
-                if (finished) runOnJS(finish)('fade');
+                if (finished) runOnJS(finish)();
             });
         }
 
         function startFlip() {
-             
-            console.log('[splash] flip start');
             rotation.value = withTiming(
                 FLIP_DEGREES,
                 { duration: FLIP_DURATION_MS, easing: Easing.linear },
                 (finished) => {
-                     
-                    console.log(`[splash] flip complete finished=${finished}`);
-                    if (finished) runOnJS(fadeOutAndFinish)(FADE_DURATION_MS, 'flip-done');
+                    if (finished) runOnJS(fadeOutAndFinish)(FADE_DURATION_MS);
                 }
             );
         }
 
         let cancelled = false;
         void AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
-             
-            console.log(`[splash] reduceMotion=${reduced}`);
             if (cancelled || doneRef.current) return;
             if (reduced) {
-                fadeOutAndFinish(REDUCED_MOTION_FADE_MS, 'reduce-motion');
+                setTimeout(() => {
+                    if (!doneRef.current) fadeOutAndFinish(REDUCED_MOTION_FADE_MS);
+                }, REDUCED_MOTION_HOLD_MS);
             } else {
                 startFlip();
             }
         });
 
         const subscription = AppState.addEventListener('change', (state) => {
-             
-            console.log(`[splash] appstate=${state}`);
-            if ((state === 'background' || state === 'inactive') && !doneRef.current) {
-                finish('appstate');
+            if (state === 'background' && !doneRef.current) {
+                complete();
             }
         });
 
