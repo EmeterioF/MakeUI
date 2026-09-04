@@ -24,9 +24,11 @@ export default function AnimatedSplash({ onDone }: Props) {
     const onDoneRef = useRef(onDone);
     onDoneRef.current = onDone;
 
-    function finish() {
+    function finish(caller: string) {
         if (doneRef.current) return;
         doneRef.current = true;
+         
+        console.log(`[splash] finish caller=${caller}`);
         onDoneRef.current();
     }
 
@@ -39,35 +41,51 @@ export default function AnimatedSplash({ onDone }: Props) {
     }));
 
     useEffect(() => {
-        function fadeOutAndFinish(duration: number) {
+        const mountTime = Date.now();
+         
+        console.log('[splash] mounted');
+
+        function fadeOutAndFinish(duration: number, reason: string) {
+             
+            console.log(`[splash] fadeOut start reason=${reason} elapsed=${Date.now() - mountTime}ms`);
             opacity.value = withTiming(0, { duration }, (finished) => {
-                if (finished) runOnJS(finish)();
+                 
+                console.log(`[splash] fade complete finished=${finished}`);
+                if (finished) runOnJS(finish)('fade');
             });
         }
 
         function startFlip() {
+             
+            console.log('[splash] flip start');
             rotation.value = withTiming(
                 FLIP_DEGREES,
                 { duration: FLIP_DURATION_MS, easing: Easing.linear },
                 (finished) => {
-                    if (finished) runOnJS(fadeOutAndFinish)(FADE_DURATION_MS);
+                     
+                    console.log(`[splash] flip complete finished=${finished}`);
+                    if (finished) runOnJS(fadeOutAndFinish)(FADE_DURATION_MS, 'flip-done');
                 }
             );
         }
 
         let cancelled = false;
         void AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
+             
+            console.log(`[splash] reduceMotion=${reduced}`);
             if (cancelled || doneRef.current) return;
             if (reduced) {
-                fadeOutAndFinish(REDUCED_MOTION_FADE_MS);
+                fadeOutAndFinish(REDUCED_MOTION_FADE_MS, 'reduce-motion');
             } else {
                 startFlip();
             }
         });
 
         const subscription = AppState.addEventListener('change', (state) => {
+             
+            console.log(`[splash] appstate=${state}`);
             if ((state === 'background' || state === 'inactive') && !doneRef.current) {
-                finish();
+                finish('appstate');
             }
         });
 
