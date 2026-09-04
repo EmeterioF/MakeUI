@@ -9,8 +9,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as SplashScreen from 'expo-splash-screen';
 
-const FLIP_DEGREES = 720;
-const FLIP_DURATION_MS = 1600;
+const FLIP_DEGREES = 360;
+const FLIP_DURATION_MS = 3000;
 const FADE_DURATION_MS = 200;
 const REDUCED_MOTION_HOLD_MS = 1000;
 const REDUCED_MOTION_FADE_MS = 300;
@@ -102,7 +102,7 @@ export default function AnimatedSplash({ onDone }: Props) {
     return (
         <View style={styles.overlay}>
             <Animated.View style={[styles.fade, fadeStyle]}>
-                <Animated.View style={flipStyle}>
+                <Animated.View style={[styles.logoFrame, flipStyle]}>
                     <Image
                         source={require('@/assets/logo.jpg')}
                         style={styles.logo}
@@ -126,6 +126,10 @@ const styles = StyleSheet.create({
     fade: {
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    logoFrame: {
+        borderRadius: 20,
+        overflow: 'hidden',
     },
     logo: {
         width: 180,
