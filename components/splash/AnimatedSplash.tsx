@@ -15,7 +15,6 @@ const FADE_DURATION_MS = 200;
 const REDUCED_MOTION_HOLD_MS = 1000;
 const REDUCED_MOTION_FADE_MS = 300;
 const MIN_VISIBLE_MS = FLIP_DURATION_MS + FADE_DURATION_MS;
-const COIN_SIZE = 180;
 
 type Props = {
     onDone: () => void;
@@ -45,36 +44,13 @@ export default function AnimatedSplash({ onDone }: Props) {
         }
     }
 
-    const fadeStyle = useAnimatedStyle(() => ({
-        opacity: opacity.value,
-    }));
-
-    const frontStyle = useAnimatedStyle(() => ({
+    const flipStyle = useAnimatedStyle(() => ({
         transform: [{ perspective: 800 }, { rotateY: `${rotation.value}deg` }],
     }));
 
-    const backStyle = useAnimatedStyle(() => ({
-        transform: [{ perspective: 800 }, { rotateY: `${rotation.value + 180}deg` }],
+    const fadeStyle = useAnimatedStyle(() => ({
+        opacity: opacity.value,
     }));
-
-    const edgeStyle = useAnimatedStyle(() => {
-        const rad = (rotation.value * Math.PI) / 180;
-        return { opacity: Math.abs(Math.sin(rad)) };
-    });
-
-    const sheenStyle = useAnimatedStyle(() => {
-        const rad = (rotation.value * Math.PI) / 180;
-        return { opacity: 0.32 * Math.abs(Math.sin(rad)) };
-    });
-
-    const shadowStyle = useAnimatedStyle(() => {
-        const rad = (rotation.value * Math.PI) / 180;
-        const faceOn = Math.abs(Math.cos(rad));
-        return {
-            opacity: 0.06 + 0.22 * faceOn,
-            transform: [{ scaleX: 0.4 + 0.6 * faceOn }],
-        };
-    });
 
     useEffect(() => {
         mountTimeRef.current = Date.now();
@@ -126,29 +102,13 @@ export default function AnimatedSplash({ onDone }: Props) {
     return (
         <View style={styles.overlay}>
             <Animated.View style={[styles.fade, fadeStyle]}>
-                <View style={styles.coinColumn}>
-                    <View style={styles.coin}>
-                        <Animated.View style={[styles.face, frontStyle]}>
-                            <Image
-                                source={require('@/assets/logo.jpg')}
-                                style={styles.logo}
-                                resizeMode="contain"
-                            />
-                        </Animated.View>
-                        <Animated.View style={[styles.face, backStyle]}>
-                            <Image
-                                source={require('@/assets/logo.jpg')}
-                                style={styles.logo}
-                                resizeMode="contain"
-                            />
-                        </Animated.View>
-                        <Animated.View style={[styles.edge, edgeStyle]}>
-                            <View style={styles.edgeHighlight} />
-                        </Animated.View>
-                        <Animated.View style={[styles.sheen, sheenStyle]} pointerEvents="none" />
-                    </View>
-                    <Animated.View style={[styles.shadow, shadowStyle]} />
-                </View>
+                <Animated.View style={[styles.logoFrame, flipStyle]}>
+                    <Image
+                        source={require('@/assets/logo.jpg')}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                </Animated.View>
             </Animated.View>
         </View>
     );
@@ -167,49 +127,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    coinColumn: {
-        alignItems: 'center',
-    },
-    coin: {
-        width: COIN_SIZE,
-        height: COIN_SIZE,
+    logoFrame: {
         borderRadius: 20,
         overflow: 'hidden',
     },
-    face: {
-        ...StyleSheet.absoluteFillObject,
-        backfaceVisibility: 'hidden',
-    },
     logo: {
-        width: COIN_SIZE,
-        height: COIN_SIZE,
-    },
-    edge: {
-        position: 'absolute',
-        left: (COIN_SIZE - 14) / 2,
-        top: 0,
-        width: 14,
-        height: COIN_SIZE,
-        borderRadius: 7,
-        backgroundColor: '#2A2A2A',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    edgeHighlight: {
-        width: 3,
-        height: COIN_SIZE - 24,
-        borderRadius: 2,
-        backgroundColor: '#5A5A5A',
-    },
-    sheen: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#FFFFFF',
-    },
-    shadow: {
-        width: 150,
-        height: 20,
-        marginTop: 26,
-        borderRadius: 10,
-        backgroundColor: '#000000',
+        width: 180,
+        height: 180,
     },
 });
