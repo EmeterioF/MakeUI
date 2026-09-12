@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, AppState, Image, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, AppState, Image, StyleSheet, Text, View } from 'react-native';
 import Animated, {
     Easing,
     runOnJS,
@@ -7,32 +7,33 @@ import Animated, {
     useSharedValue,
     withTiming,
 } from 'react-native-reanimated';
-import { Asset } from 'expo-asset';
 import * as SplashScreen from 'expo-splash-screen';
 
-// Playback contract with tools/coin-frame-exporter.html:
-// 64 frames, row-major, 8 cols x 8 rows in a square sprite sheet.
-const FRAME_COUNT = 64;
-const SPRITE_COLS = 8;
-const FPS = 30;
-const PLAYBACK_MS = Math.round((FRAME_COUNT / FPS) * 1000);
+const SETTLE_MS = 500;
+const REVEAL_MS = 900;
+const HOLD_MS = 600;
 const FADE_DURATION_MS = 200;
 const REDUCED_MOTION_HOLD_MS = 1000;
 const REDUCED_MOTION_FADE_MS = 300;
-const MIN_VISIBLE_MS = PLAYBACK_MS + FADE_DURATION_MS;
-const PRELOAD_TIMEOUT_MS = 6000;
-// The coin fills ~68% of each cell; 264dp keeps it at ~180dp on screen.
-const DISPLAY = 264;
-const SPRITE_SOURCE = require('@/assets/splash/coin-sprite.png');
+const MIN_VISIBLE_MS = SETTLE_MS + REVEAL_MS + HOLD_MS + FADE_DURATION_MS;
+const ROW_SHIFT = -70;
+const LOGO_SIZE = 180;
+const WORD_GAP = 16;
+const WORD_FONT_SIZE = 40;
+const WORD_FALLBACK_WIDTH = 200;
+const WORD_SLIDE_DISTANCE = 24;
+const WORD_SLIDE_DELAY_MS = 150;
 
 type Props = {
     onDone: () => void;
 };
 
 export default function AnimatedSplash({ onDone }: Props) {
-    const progress = useSharedValue(0);
+    const settle = useSharedValue(0);
+    const reveal = useSharedValue(0);
+    const wordIn = useSharedValue(0);
     const opacity = useSharedValue(1);
-    const [spriteReady, setSpriteReady] = useState(false);
+    const [wordWidth, setWordWidth] = useState(WORD_FALLBACK_WIDTH);
     const doneRef = useRef(false);
     const mountTimeRef = useRef(0);
     const onDoneRef = useRef(onDone);
@@ -58,22 +59,25 @@ export default function AnimatedSplash({ onDone }: Props) {
         opacity: opacity.value,
     }));
 
-    const spriteStyle = useAnimatedStyle(() => {
-        const index = Math.min(FRAME_COUNT - 1, Math.floor(progress.value));
-        const col = index % SPRITE_COLS;
-        const row = Math.floor(index / SPRITE_COLS);
-        return {
-            transform: [{ translateX: -col * DISPLAY }, { translateY: -row * DISPLAY }],
-        };
-    });
+    const rowStyle = useAnimatedStyle(() => ({
+        opacity: settle.value,
+        transform: [{ translateX: ROW_SHIFT * reveal.value }],
+    }));
+
+    const maskStyle = useAnimatedStyle(() => ({
+        width: wordWidth * reveal.value,
+    }));
+
+    const wordStyle = useAnimatedStyle(() => ({
+        opacity: wordIn.value,
+        transform: [{ translateX: -WORD_SLIDE_DISTANCE * (1 - wordIn.value) }],
+    }));
 
     useEffect(() => {
         mountTimeRef.current = Date.now();
         // Reveal this overlay immediately. The native splash sits on top of
-        // all JS views, so the splash would otherwise run invisibly beneath it.
+        // all JS views, so the intro would otherwise play invisibly beneath it.
         void SplashScreen.hideAsync().catch(() => {});
-
-        let cancelled = false;
 
         function fadeOutAndFinish(duration: number) {
             opacity.value = withTiming(0, { duration }, (finished) => {
@@ -81,54 +85,50 @@ export default function AnimatedSplash({ onDone }: Props) {
             });
         }
 
-        function startPlayback() {
-            if (cancelled || doneRef.current) return;
-            setSpriteReady(true);
-            progress.value = withTiming(
-                FRAME_COUNT - 1,
-                { duration: PLAYBACK_MS, easing: Easing.linear },
-                (finished) => {
-                    if (finished) runOnJS(fadeOutAndFinish)(FADE_DURATION_MS);
+        function startReveal() {
+            reveal.value = withTiming(
+                1,
+                { duration: REVEAL_MS, easing: Easing.out(Easing.cubic) },
+                (revealFinished) => {
+                    if (revealFinished) {
+                        setTimeout(() => {
+                            runOnJS(fadeOutAndFinish)(FADE_DURATION_MS);
+                        }, HOLD_MS);
+                    }
                 }
             );
+            // The word trails the mask wipe slightly so it drifts out
+            // from behind the logo instead of just unclipping.
+            setTimeout(() => {
+                if (!cancelled && !doneRef.current) {
+                    wordIn.value = withTiming(1, { duration: REVEAL_MS - WORD_SLIDE_DELAY_MS });
+                }
+            }, WORD_SLIDE_DELAY_MS);
         }
 
-        // Static logo.jpg is bundled and instant; the 1MB sprite downloads
-        // separately. Hold the static frame and start the clock only once
-        // the sprite pixels are ready, otherwise playback runs on a blank.
-        function fallbackToStatic(fadeMs: number) {
+        function startIntro() {
+            settle.value = withTiming(1, { duration: SETTLE_MS }, (finished) => {
+                if (finished) runOnJS(startReveal)();
+            });
+        }
+
+        function showStaticFinalFrame() {
+            settle.value = 1;
+            reveal.value = 1;
+            wordIn.value = 1;
             setTimeout(() => {
-                if (!doneRef.current) fadeOutAndFinish(fadeMs);
+                if (!doneRef.current) fadeOutAndFinish(REDUCED_MOTION_FADE_MS);
             }, REDUCED_MOTION_HOLD_MS);
         }
 
+        let cancelled = false;
         void AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
             if (cancelled || doneRef.current) return;
             if (reduced) {
-                fallbackToStatic(REDUCED_MOTION_FADE_MS);
-                return;
+                showStaticFinalFrame();
+            } else {
+                startIntro();
             }
-            let settled = false;
-            const timer = setTimeout(() => {
-                if (!settled) {
-                    settled = true;
-                    fallbackToStatic(FADE_DURATION_MS);
-                }
-            }, PRELOAD_TIMEOUT_MS);
-            void Asset.loadAsync(SPRITE_SOURCE).then(
-                () => {
-                    if (settled) return;
-                    settled = true;
-                    clearTimeout(timer);
-                    startPlayback();
-                },
-                () => {
-                    if (settled) return;
-                    settled = true;
-                    clearTimeout(timer);
-                    fallbackToStatic(FADE_DURATION_MS);
-                }
-            );
         });
 
         const subscription = AppState.addEventListener('change', (state) => {
@@ -147,23 +147,27 @@ export default function AnimatedSplash({ onDone }: Props) {
     return (
         <View style={styles.overlay}>
             <Animated.View style={[styles.fade, fadeStyle]}>
-                <View style={styles.window}>
-                    {spriteReady ? (
-                        <Animated.Image
-                            source={SPRITE_SOURCE}
-                            style={[styles.sprite, spriteStyle]}
-                            resizeMode="cover"
-                        />
-                    ) : (
-                        <View style={styles.staticWrap}>
-                            <Image
-                                source={require('@/assets/logo.jpg')}
-                                style={styles.staticLogo}
-                                resizeMode="contain"
-                            />
-                        </View>
-                    )}
-                </View>
+                <Animated.View style={[styles.row, rowStyle]}>
+                    <Image
+                        source={require('@/assets/logo.jpg')}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                    <Animated.View style={[styles.mask, maskStyle]}>
+                        <Animated.View style={[styles.wordSlide, wordStyle]}>
+                            <Text
+                                style={styles.word}
+                                numberOfLines={1}
+                                onLayout={(event) => {
+                                    const { width } = event.nativeEvent.layout;
+                                    if (width > 0) setWordWidth(width);
+                                }}
+                            >
+                                MakeUI
+                            </Text>
+                        </Animated.View>
+                    </Animated.View>
+                </Animated.View>
             </Animated.View>
         </View>
     );
@@ -182,26 +186,26 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    window: {
-        width: DISPLAY,
-        height: DISPLAY,
-        overflow: 'hidden',
+    row: {
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
     },
-    sprite: {
-        width: DISPLAY * SPRITE_COLS,
-        height: DISPLAY * SPRITE_COLS,
-    },
-    staticWrap: {
-        width: DISPLAY,
-        height: DISPLAY,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    staticLogo: {
-        width: 180,
-        height: 180,
+    logo: {
+        width: LOGO_SIZE,
+        height: LOGO_SIZE,
         borderRadius: 20,
+    },
+    mask: {
+        overflow: 'hidden',
+        marginLeft: WORD_GAP,
+    },
+    wordSlide: {
+        justifyContent: 'center',
+    },
+    word: {
+        fontSize: WORD_FONT_SIZE,
+        fontWeight: '800',
+        letterSpacing: 0.5,
+        color: '#111111',
     },
 });
