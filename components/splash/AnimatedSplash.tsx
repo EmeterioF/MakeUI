@@ -21,7 +21,6 @@ const LOGO_SIZE = 180;
 const WORD_GAP = 16;
 const WORD_FONT_SIZE = 40;
 const WORD_FALLBACK_WIDTH = 200;
-const WORD_SLIDE_DISTANCE = 24;
 const WORD_SLIDE_DELAY_MS = 150;
 
 type Props = {
@@ -32,8 +31,10 @@ export default function AnimatedSplash({ onDone }: Props) {
     const settle = useSharedValue(0);
     const reveal = useSharedValue(0);
     const wordIn = useSharedValue(0);
+    const wordX = useSharedValue(0);
     const opacity = useSharedValue(1);
     const [wordWidth, setWordWidth] = useState(WORD_FALLBACK_WIDTH);
+    const wordWidthRef = useRef(WORD_FALLBACK_WIDTH);
     const doneRef = useRef(false);
     const mountTimeRef = useRef(0);
     const onDoneRef = useRef(onDone);
@@ -64,13 +65,12 @@ export default function AnimatedSplash({ onDone }: Props) {
         transform: [{ translateX: ROW_SHIFT * reveal.value }],
     }));
 
-    const maskStyle = useAnimatedStyle(() => ({
-        width: wordWidth * reveal.value,
-    }));
-
+    // Static clip: the text is always laid out at full width inside a
+    // full-size mask, so Yoga never measures it inside a zero-width box
+    // (which cached an empty layout on Android and left the word invisible).
     const wordStyle = useAnimatedStyle(() => ({
         opacity: wordIn.value,
-        transform: [{ translateX: -WORD_SLIDE_DISTANCE * (1 - wordIn.value) }],
+        transform: [{ translateX: wordX.value }],
     }));
 
     useEffect(() => {
@@ -97,11 +97,16 @@ export default function AnimatedSplash({ onDone }: Props) {
                     }
                 }
             );
-            // The word trails the mask wipe slightly so it drifts out
-            // from behind the logo instead of just unclipping.
+            // The word starts parked fully outside the mask's left edge and
+            // drifts out from behind the logo as the row glides.
+            wordX.value = -wordWidthRef.current;
             setTimeout(() => {
                 if (!cancelled && !doneRef.current) {
                     wordIn.value = withTiming(1, { duration: REVEAL_MS - WORD_SLIDE_DELAY_MS });
+                    wordX.value = withTiming(0, {
+                        duration: REVEAL_MS - WORD_SLIDE_DELAY_MS,
+                        easing: Easing.out(Easing.cubic),
+                    });
                 }
             }, WORD_SLIDE_DELAY_MS);
         }
@@ -153,20 +158,23 @@ export default function AnimatedSplash({ onDone }: Props) {
                         style={styles.logo}
                         resizeMode="contain"
                     />
-                    <Animated.View style={[styles.mask, maskStyle]}>
+                    <View style={[styles.mask, { width: wordWidth }]}>
                         <Animated.View style={[styles.wordSlide, wordStyle]}>
                             <Text
                                 style={styles.word}
                                 numberOfLines={1}
                                 onLayout={(event) => {
                                     const { width } = event.nativeEvent.layout;
-                                    if (width > 0) setWordWidth(width);
+                                    if (width > 0 && width !== wordWidthRef.current) {
+                                        wordWidthRef.current = width;
+                                        setWordWidth(width);
+                                    }
                                 }}
                             >
                                 MakeUI
                             </Text>
                         </Animated.View>
-                    </Animated.View>
+                    </View>
                 </Animated.View>
             </Animated.View>
         </View>
