@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import JSZip from 'jszip';
 import {
@@ -50,17 +50,10 @@ export const exportProjectAsZip = async (projectId: number): Promise<void> => {
 
     const base64 = await zip.generateAsync({ type: 'base64' });
 
-    const cacheDir = FileSystem.cacheDirectory;
-    if (!cacheDir) {
-        throw new Error('Unable to access cache directory.');
-    }
+    const zipFile = new File(Paths.cache, `${folderName}.zip`);
+    zipFile.write(base64, { encoding: 'base64' });
 
-    const zipUri = `${cacheDir}${folderName}.zip`;
-    await FileSystem.writeAsStringAsync(zipUri, base64, {
-        encoding: FileSystem.EncodingType.Base64,
-    });
-
-    await Sharing.shareAsync(zipUri, {
+    await Sharing.shareAsync(zipFile.uri, {
         dialogTitle: `Export ${project.name}`,
         mimeType: 'application/zip',
         UTI: 'com.pkware.zip-archive',

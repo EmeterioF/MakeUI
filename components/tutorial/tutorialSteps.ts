@@ -1,10 +1,10 @@
 const tutorialSteps = [
-    require('../../assets/tutorial/1.png'),
-    require('../../assets/tutorial/2.png'),
-    require('../../assets/tutorial/3.png'),
-    require('../../assets/tutorial/4.png'),
-    require('../../assets/tutorial/5.png'),
-    require('../../assets/tutorial/6.png'),
+    require('../../assets/tutorial/1.jpg'),
+    require('../../assets/tutorial/2.jpg'),
+    require('../../assets/tutorial/3.jpg'),
+    require('../../assets/tutorial/4.jpg'),
+    require('../../assets/tutorial/5.jpg'),
+    require('../../assets/tutorial/6.jpg'),
 ];
 
 export default tutorialSteps;

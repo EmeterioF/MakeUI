@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import type { CanvasConfig, ComponentNode } from '@/editor/componentNodeTypes';
 import { convertTreeToReactNativeCode } from '@/export/treeToReactNative';
@@ -25,16 +25,9 @@ const cleanFileName = (fileName: string): string => {
 };
 
 const writeCodeToTempFile = async (code: string, fileName: string): Promise<string> => {
-    const cacheDirectory = FileSystem.cacheDirectory;
-    if (!cacheDirectory) {
-        throw new Error('Unable to access cache directory.');
-    }
-
-    const fileUri = `${cacheDirectory}${cleanFileName(fileName)}`;
-    await FileSystem.writeAsStringAsync(fileUri, code, {
-        encoding: FileSystem.EncodingType.UTF8,
-    });
-    return fileUri;
+    const file = new File(Paths.cache, cleanFileName(fileName));
+    file.write(code);
+    return file.uri;
 };
 
 export const saveComponentFile = async ({

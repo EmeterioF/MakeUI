@@ -7,17 +7,15 @@ import {
     Modal,
     Image,
     Dimensions,
+    FlatList,
     type LayoutChangeEvent,
+    type NativeScrollEvent,
+    type NativeSyntheticEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { runOnJS, useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
-import { Carousel, Pagination } from 'react-native-reanimated-carousel';
-import type { CarouselRef } from 'react-native-reanimated-carousel';
 import tutorialSteps from './tutorialSteps';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-const ANIMATION = { type: 'spring', stiffness: 220, damping: 28, mass: 0.7 } as const;
 
 type Props = {
     visible: boolean;
@@ -25,64 +23,67 @@ type Props = {
 };
 
 export default function TutorialOverlay({ visible, onDismiss }: Props) {
-    const carouselRef = useRef<CarouselRef>(null);
-    const progress = useSharedValue(0);
+    const listRef = useRef<FlatList<number>>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [carouselSize, setCarouselSize] = useState({ width: 0, height: 0 });
+    const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
     const totalSteps = tutorialSteps.length;
     const isLast = currentIndex === totalSteps - 1;
-
-    // Drive currentIndex from the frame-accurate progress SharedValue so
-    // the "Got it"/"Next" button text updates instantly during a swipe,
-    // rather than waiting for the snap animation to settle.
-    useAnimatedReaction(
-        () => Math.round(progress.value),
-        (current, previous) => {
-            if (current !== previous) {
-                runOnJS(setCurrentIndex)(current);
-            }
-        },
-        []
-    );
 
     useEffect(() => {
         if (visible) {
             setCurrentIndex(0);
-            progress.value = 0;
+            listRef.current?.scrollToOffset({ offset: 0, animated: false });
         }
-    }, [visible, progress]);
+    }, [visible]);
 
-    const handleCarouselLayout = useCallback((event: LayoutChangeEvent) => {
+    const handlePagerLayout = useCallback((event: LayoutChangeEvent) => {
         const { width, height } = event.nativeEvent.layout;
-        setCarouselSize((prev) =>
-            prev.width === width && prev.height === height ? prev : { width, height }
-        );
+        setPageSize((prev) => (prev.width === width && prev.height === height ? prev : { width, height }));
     }, []);
+
+    const handleMomentumScrollEnd = useCallback(
+        (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+            if (pageSize.width > 0) {
+                const index = Math.round(event.nativeEvent.contentOffset.x / pageSize.width);
+                setCurrentIndex(Math.max(0, Math.min(totalSteps - 1, index)));
+            }
+        },
+        [pageSize.width, totalSteps]
+    );
+
+    // Continuous source of truth for the indicator: follows the real
+    // scroll position every frame, so rapid swipes or Next taps can
+    // never leave the dots showing a stale page.
+    const handleScroll = useCallback(
+        (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+            if (pageSize.width > 0) {
+                const index = Math.round(event.nativeEvent.contentOffset.x / pageSize.width);
+                const clamped = Math.max(0, Math.min(totalSteps - 1, index));
+                setCurrentIndex((prev) => (prev === clamped ? prev : clamped));
+            }
+        },
+        [pageSize.width, totalSteps]
+    );
 
     const handleNext = useCallback(() => {
         if (isLast) {
             onDismiss();
         } else {
-            carouselRef.current?.next({ animated: true });
+            listRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
         }
-    }, [isLast, onDismiss]);
+    }, [isLast, onDismiss, currentIndex]);
 
     const handleSkip = useCallback(() => {
         onDismiss();
     }, [onDismiss]);
 
     const handleDotPress = useCallback((index: number) => {
-        carouselRef.current?.scrollTo({ index, animated: true });
+        listRef.current?.scrollToIndex({ index, animated: true });
     }, []);
-
-    const getDotAccessibilityLabel = useCallback(
-        (index: number, count: number) => `Step ${index + 1} of ${count}`,
-        []
-    );
 
     if (!visible) return null;
 
-    const isCarouselMeasured = carouselSize.width > 0 && carouselSize.height > 0;
+    const isPagerMeasured = pageSize.width > 0 && pageSize.height > 0;
 
     return (
         <Modal
@@ -107,39 +108,66 @@ export default function TutorialOverlay({ visible, onDismiss }: Props) {
                         </Pressable>
                     </View>
 
-                    <View style={styles.carouselWrapper} onLayout={handleCarouselLayout}>
-                        {isCarouselMeasured && (
-                            <Carousel
-                                ref={carouselRef}
+                    <View style={styles.carouselWrapper} onLayout={handlePagerLayout}>
+                        {isPagerMeasured && (
+                            <FlatList
+                                ref={listRef}
                                 data={tutorialSteps}
-                                defaultIndex={0}
-                                loop={false}
-                                overscrollEnabled={false}
-                                snapMode="page"
-                                animation={ANIMATION}
-                                progress={progress}
-                                style={{
-                                    width: carouselSize.width,
-                                    height: carouselSize.height,
-                                }}
+                                keyExtractor={(_, index) => String(index)}
+                                horizontal
+                                pagingEnabled
+                                disableIntervalMomentum
+                                snapToInterval={pageSize.width}
+                                snapToAlignment="center"
+                                decelerationRate="fast"
+                                showsHorizontalScrollIndicator={false}
+                                bounces={false}
+                                overScrollMode="never"
+                                scrollEventThrottle={16}
+                                onScroll={handleScroll}
+                                onMomentumScrollEnd={handleMomentumScrollEnd}
+                                getItemLayout={(_, index) => ({
+                                    length: pageSize.width,
+                                    offset: pageSize.width * index,
+                                    index,
+                                })}
                                 renderItem={({ item }) => (
-                                    <View style={styles.imageContainer}>
-                                        <Image source={item} style={styles.image} resizeMode="contain" />
+                                    <View
+                                        style={[
+                                            styles.imageContainer,
+                                            { width: pageSize.width, height: pageSize.height },
+                                        ]}
+                                    >
+                                        <Image
+                                            source={item}
+                                            style={styles.image}
+                                            resizeMode="contain"
+                                            fadeDuration={0}
+                                        />
                                     </View>
                                 )}
                             />
                         )}
                     </View>
 
-                    <Pagination
-                        progress={progress}
-                        count={totalSteps}
-                        onPress={handleDotPress}
-                        getItemAccessibilityLabel={getDotAccessibilityLabel}
-                        containerStyle={styles.dotsRow}
-                        dotStyle={styles.dot}
-                        activeDotStyle={styles.dotActive}
-                    />
+                    <View style={styles.dotsRow}>
+                        {Array.from({ length: totalSteps }).map((_, index) => (
+                            <Pressable
+                                key={index}
+                                onPress={() => handleDotPress(index)}
+                                hitSlop={8}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Step ${index + 1} of ${totalSteps}`}
+                            >
+                                <View
+                                    style={[
+                                        styles.dot,
+                                        index === currentIndex && styles.dotActive,
+                                    ]}
+                                />
+                            </Pressable>
+                        ))}
+                    </View>
 
                     <Pressable
                         style={({ pressed }) => [styles.nextBtn, pressed && styles.buttonPressed]}

@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ComponentFileListItem } from '@/components/home/ComponentFileListItem';
 import { useHomeFileActions } from '@/components/home/useHomeFileActions';
 import { useProjectStore } from '@/editor/projectStore';
 import type { ProjectListItem } from '@/data/componentFileRepository';
+import { preloadTutorialAssets } from '@/components/tutorial/preloadTutorialAssets';
 
 function ProjectListItem({ project, onOpen, onDelete }: {
     project: ProjectListItem;
@@ -44,6 +45,12 @@ export default function HomeScreen() {
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newProjectName, setNewProjectName] = useState('');
+
+    useEffect(() => {
+        // Warm the tutorial image cache at app launch so the pictures
+        // are instant, including on the very first tutorial open.
+        preloadTutorialAssets();
+    }, []);
 
     const isProjectView = selectedProjectId === null;
 

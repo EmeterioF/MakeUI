@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import ComponentRenderer from '@/renderer/componentRenderer';
@@ -12,6 +12,7 @@ import { AiErrorToast } from '@/components/ai/AiErrorToast';
 import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { useTutorial } from '@/hooks/useTutorial';
+import { preloadTutorialAssets } from '@/components/tutorial/preloadTutorialAssets';
 
 export default function EditorScreen() {
     const componentTree = useComponentNodeStore((s) => s.componentTree);
@@ -20,6 +21,12 @@ export default function EditorScreen() {
     const { visible: tutorialVisible, showTutorial, dismissTutorial } = useTutorial();
 
     useAutoSave();
+
+    useEffect(() => {
+        // Warm the tutorial image cache while the user works in the editor
+        // so the pictures appear instantly when the tutorial opens.
+        preloadTutorialAssets();
+    }, []);
 
     return (
         <GestureHandlerRootView style={styles.container}>
