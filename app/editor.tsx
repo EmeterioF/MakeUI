@@ -9,6 +9,7 @@ import { AiPreviewOverlay } from '@/components/ai/AiPreviewOverlay';
 import { AiLoadingIndicator } from '@/components/ai/AiLoadingIndicator';
 import { useAutoSave } from '@/components/editor/useAutoSave';
 import { AiErrorToast } from '@/components/ai/AiErrorToast';
+import { AiUndoToast } from '@/components/ai/AiUndoToast';
 import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
 import TutorialOverlay from '@/components/tutorial/TutorialOverlay';
 import { useTutorial } from '@/hooks/useTutorial';
@@ -17,7 +18,7 @@ import { preloadTutorialAssets } from '@/components/tutorial/preloadTutorialAsse
 export default function EditorScreen() {
     const componentTree = useComponentNodeStore((s) => s.componentTree);
     const canvasConfig = useComponentNodeStore((s) => s.canvasConfig);
-    const { aiLoading, aiError } = useAiSuggestionStore();
+    const { aiLoading, aiError, undoAvailable, undoApply, dismissUndo } = useAiSuggestionStore();
     const { visible: tutorialVisible, showTutorial, dismissTutorial } = useTutorial();
 
     useAutoSave();
@@ -54,6 +55,7 @@ export default function EditorScreen() {
                 <AiPreviewOverlay />
                 <AiLoadingIndicator visible={aiLoading} />
                 <AiErrorToast message={aiError} onDismiss={() => useAiSuggestionStore.setState({ aiError: null })} />
+                <AiUndoToast visible={undoAvailable} onUndo={undoApply} onDismiss={dismissUndo} />
                 <TutorialOverlay visible={tutorialVisible} onDismiss={dismissTutorial} />
             </BottomSheetModalProvider>
         </GestureHandlerRootView>
