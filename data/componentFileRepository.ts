@@ -65,8 +65,22 @@ const ensureTable = async (): Promise<SQLite.SQLiteDatabase> => {
                 name TEXT NOT NULL,
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-            );    
+            );
         `)
+
+        // Migrate databases created before project support: CREATE TABLE IF
+        // NOT EXISTS is a no-op on those, so add the missing columns or every
+        // query touching project_id crashes with "no such column".
+        const columns = await db.getAllAsync<{ name: string }>(
+            'PRAGMA table_info(component_files);'
+        );
+        const columnNames = new Set(columns.map((c) => c.name));
+        if (!columnNames.has('project_id')) {
+            await db.execAsync('ALTER TABLE component_files ADD COLUMN project_id INTEGER;');
+        }
+        if (!columnNames.has('sort_order')) {
+            await db.execAsync('ALTER TABLE component_files ADD COLUMN sort_order INTEGER DEFAULT 0;');
+        }
         isInitialized = true;
     }
     return db;
