@@ -17,7 +17,11 @@ export function useAutoSave() {
         mountedRef.current = true;
 
         const unsub = useComponentNodeStore.subscribe((state, prevState) => {
-            if (state.componentTree !== prevState.componentTree || state.canvasConfig !== prevState.canvasConfig) {
+            if (
+                state.componentTree !== prevState.componentTree ||
+                state.canvasConfig !== prevState.canvasConfig ||
+                state.currentFileName !== prevState.currentFileName
+            ) {
                 schedule();
             }
         });
@@ -28,6 +32,9 @@ export function useAutoSave() {
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
                 timerRef.current = null;
+                // Flush on exit: leaving the editor (system back, HOME button,
+                // any navigation) must not drop a pending rename/edit.
+                void saveRef.current();
             }
         };
     }, []);
