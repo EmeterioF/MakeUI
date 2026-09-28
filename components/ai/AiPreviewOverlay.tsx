@@ -1,6 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, Modal, ScrollView, Dimensions } from 'react-native';
 import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
+import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import ComponentRenderer from '@/renderer/componentRenderer';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -17,15 +18,41 @@ export function AiPreviewOverlay() {
     discardSuggestions,
     fetchSuggestions,
   } = useAiSuggestionStore();
+  const canvasConfig = useComponentNodeStore((s) => s.canvasConfig);
 
   const scrollRef = useRef<ScrollView>(null);
-  const [showInfo, setShowInfo] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  // Collapse the notes whenever the page changes so descriptions
+  // never cover the picture uninvited.
+  useEffect(() => {
+    setExpanded(false);
+  }, [selectedIndex]);
+
+  // A fresh set of suggestions always starts the pager back on Original.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ x: 0, y: 0, animated: false });
+  }, [aiSuggestions]);
 
   if (!showAiPreview || !aiSuggestions) return null;
 
   const currentImprovements = selectedIndex > 0
     ? (aiSuggestions[selectedIndex - 1]?.improvements ?? [])
     : [];
+
+  // Render each page inside the live canvas flex config and background,
+  // so what you see here is what Apply produces. Width still differs
+  // slightly (the modal is narrower than the canvas), so treat this as
+  // a faithful approximation, not a pixel proof.
+  const canvasPreviewStyle = {
+    flexDirection: canvasConfig.style.flexDirection,
+    justifyContent: canvasConfig.style.justifyContent,
+    alignItems: canvasConfig.style.alignItems,
+    flexWrap: canvasConfig.style.flexWrap,
+    gap: canvasConfig.style.gap,
+    padding: canvasConfig.style.padding,
+    backgroundColor: canvasConfig.style.backgroundColor,
+  };
 
   const totalPages = 1 + aiSuggestions.length;
   const currentLabel = selectedIndex === 0
@@ -74,30 +101,13 @@ export function AiPreviewOverlay() {
           </View>
 
           <View style={styles.labelRow}>
-            <View style={styles.labelLeft}>
-              <Text style={styles.pageLabel}>{currentLabel}</Text>
-              {currentImprovements.length > 0 && (
-                <Pressable onPress={() => setShowInfo((v) => !v)} style={styles.infoBtn} hitSlop={8}>
-                  <Text style={styles.infoBtnText}>?</Text>
-                </Pressable>
-              )}
-            </View>
+            <Text style={styles.pageLabel} numberOfLines={1}>
+              {currentLabel}
+            </Text>
             <Text style={styles.pageCounter}>
               {selectedIndex + 1} / {totalPages}
             </Text>
           </View>
-
-          {showInfo && currentImprovements.length > 0 && (
-            <>
-              <Pressable style={styles.tooltipBackdrop} onPress={() => setShowInfo(false)} />
-              <View style={styles.infoTooltip}>
-                <Text style={styles.infoTooltipTitle}>Improvements:</Text>
-                {currentImprovements.slice(0, 3).map((item, i) => (
-                  <Text key={i} style={styles.infoTooltipItem}>• {item}</Text>
-                ))}
-              </View>
-            </>
-          )}
 
           <View style={styles.carouselContainer}>
             <ScrollView
@@ -109,24 +119,46 @@ export function AiPreviewOverlay() {
               contentOffset={{ x: 0, y: 0 }}
             >
               <View style={styles.carouselPage}>
-                <View style={styles.preview}>
+                <View style={[styles.preview, canvasPreviewStyle]}>
                   {aiOriginalTree?.map((node) => (
-                    <ComponentRenderer key={node.id} node={node} />
+                    <ComponentRenderer key={node.id} node={node} interactive={false} />
                   ))}
                 </View>
               </View>
 
               {aiSuggestions.map((suggestion, index) => (
                 <View key={index} style={styles.carouselPage}>
-                  <View style={styles.preview}>
+                  <View style={[styles.preview, canvasPreviewStyle]}>
                     {suggestion.componentTree.map((node) => (
-                      <ComponentRenderer key={node.id} node={node} />
+                      <ComponentRenderer key={node.id} node={node} interactive={false} />
                     ))}
                   </View>
                 </View>
               ))}
             </ScrollView>
           </View>
+
+          {currentImprovements.length > 0 && (
+            <View style={styles.whyBox}>
+              <Pressable
+                onPress={() => setExpanded((v) => !v)}
+                style={styles.whyToggle}
+                accessibilityRole="button"
+                accessibilityLabel={expanded ? 'Hide improvement notes' : 'Show improvement notes'}
+              >
+                <Text style={styles.whyToggleText}>
+                  Why this works {expanded ? '▴' : '▾'}
+                </Text>
+              </Pressable>
+              {expanded && (
+                <View style={styles.whyList}>
+                  {currentImprovements.map((item, i) => (
+                    <Text key={i} style={styles.whyItem}>• {item}</Text>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
 
           <View style={styles.dotsRow}>
             {Array.from({ length: totalPages }).map((_, index) => (
@@ -212,6 +244,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   pageLabel: {
+    flex: 1,
     fontSize: 15,
     fontWeight: '600',
     color: '#007AFF',
@@ -219,6 +252,7 @@ const styles = StyleSheet.create({
   pageCounter: {
     fontSize: 13,
     color: '#999',
+    marginLeft: 8,
   },
   carouselContainer: {
     flex: 1,
@@ -234,9 +268,33 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     marginHorizontal: 8,
-    padding: 12,
-    backgroundColor: '#f5f5f5',
     borderRadius: 8,
+    overflow: 'hidden',
+  },
+  whyBox: {
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    maxHeight: 140,
+  },
+  whyToggle: {
+    alignSelf: 'flex-start',
+    paddingVertical: 4,
+  },
+  whyToggleText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#007AFF',
+  },
+  whyList: {
+    marginTop: 4,
+    gap: 2,
+  },
+  whyItem: {
+    fontSize: 12,
+    color: '#555',
+    lineHeight: 18,
   },
   dotsRow: {
     flexDirection: 'row',
@@ -256,63 +314,6 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-  },
-  labelLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  infoBtn: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#e8e8e8',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
-  infoBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#888',
-    marginTop: -1,
-  },
-  tooltipBackdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 99,
-  },
-  infoTooltip: {
-    position: 'absolute',
-    top: 82,
-    left: 12,
-    right: 12,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 12,
-    zIndex: 100,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    borderWidth: 1,
-    borderColor: '#eee',
-  },
-  infoTooltipTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 4,
-  },
-  infoTooltipItem: {
-    fontSize: 12,
-    color: '#555',
-    lineHeight: 18,
   },
   actions: {
     flexDirection: 'row',

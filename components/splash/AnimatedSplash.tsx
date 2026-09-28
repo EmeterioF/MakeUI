@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, AppState, Image, StyleSheet, Text, View } from 'react-native';
+import { Asset } from 'expo-asset';
 import Animated, {
     Easing,
     runOnJS,
@@ -19,6 +20,10 @@ const REDUCED_MOTION_HOLD_MS = 1000;
 const REDUCED_MOTION_FADE_MS = 300;
 const LOGO_SIZE = 144;
 const LOGO_START_SCALE = 0.7;
+// Upper bound for waiting on the logo download. In dev the asset is served
+// over the network (slow over tunnel); in production APKs it is bundled
+// locally and resolves near-instantly. The splash must never stall on this.
+const LOGO_DOWNLOAD_TIMEOUT_MS = 3000;
 const WORD_GAP = 12;
 const WORD_FONT_SIZE = 32;
 const WORD_FALLBACK_WIDTH = 150;
@@ -120,14 +125,25 @@ export default function AnimatedSplash({ onDone }: Props) {
         }
 
         let cancelled = false;
-        void AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
+        void (async () => {
+            // The logo file is fetched from Metro in dev and can lag behind
+            // the intro on slow connections (e.g. tunnel), leaving an empty
+            // box while the asset-free text animates. Wait for it first.
+            const download = Asset.fromModule(require('@/assets/logo.png')).downloadAsync();
+            const timeout = new Promise<void>((resolve) => {
+                const id = setTimeout(() => resolve(), LOGO_DOWNLOAD_TIMEOUT_MS);
+                timeoutsRef.current.push(id);
+            });
+            await Promise.race([download.then(() => undefined, () => undefined), timeout]);
+            if (cancelled || doneRef.current) return;
+            const reduced = await AccessibilityInfo.isReduceMotionEnabled().catch(() => false);
             if (cancelled || doneRef.current) return;
             if (reduced) {
                 showStaticFinalFrame();
             } else {
                 startIntro();
             }
-        });
+        })();
 
         const subscription = AppState.addEventListener('change', (state) => {
             if (state === 'background' && !doneRef.current) {

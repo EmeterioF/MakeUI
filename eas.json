@@ -13,8 +13,12 @@
     },
     "production": {
       "autoIncrement": true,
+      "environment": "production",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_AI_BACKEND_URL": "https://makeui-backend.vercel.app"
       }
     }
   },

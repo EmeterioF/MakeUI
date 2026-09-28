@@ -16,12 +16,17 @@ interface AiSuggestionState {
   aiLoading: boolean;
   aiError: string | null;
   showAiPreview: boolean;
+  /** True right after an apply, while a one-level undo is still available. */
+  undoAvailable: boolean;
 
   fetchSuggestions: () => Promise<void>;
   selectSuggestion: (index: number) => void;
   applySuggestions: () => void;
   discardSuggestions: () => void;
   togglePreview: () => void;
+  /** Restores the tree from before the last apply. Session-only, single level. */
+  undoApply: () => void;
+  dismissUndo: () => void;
 }
 
 export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
@@ -31,6 +36,7 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
   aiLoading: false,
   aiError: null,
   showAiPreview: false,
+  undoAvailable: false,
 
   fetchSuggestions: async () => {
     const { componentTree, canvasConfig } = useComponentNodeStore.getState();
@@ -40,7 +46,7 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
       return;
     }
 
-    set({ aiLoading: true, aiError: null });
+    set({ aiLoading: true, aiError: null, undoAvailable: false });
 
     try {
       const result = await generateLayoutSuggestions(componentTree, canvasConfig);
@@ -73,11 +79,28 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
 
     set({
       aiSuggestions: null,
-      aiOriginalTree: null,
+      // Keep aiOriginalTree so the apply can be undone below.
       selectedIndex: 0,
       showAiPreview: false,
       aiError: null,
+      undoAvailable: true,
     });
+  },
+
+  undoApply: () => {
+    const { aiOriginalTree } = get();
+    if (!aiOriginalTree) return;
+
+    useComponentNodeStore.getState().replaceTree(aiOriginalTree);
+
+    set({
+      aiOriginalTree: null,
+      undoAvailable: false,
+    });
+  },
+
+  dismissUndo: () => {
+    set({ undoAvailable: false, aiOriginalTree: null });
   },
 
   discardSuggestions: () => {

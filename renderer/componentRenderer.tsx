@@ -27,9 +27,20 @@ import { useGesture } from '@/renderer/useGesture';
 
 type Props = {
     node: ComponentNode;
+    /**
+     * When false, renders the node without gestures, selection visuals,
+     * or layout reporting. Used for previews (e.g. AI suggestions) so a
+     * preview can never select, drag, or corrupt the bounds of live
+     * editor nodes that share the same ids. Static per instance, so the
+     * early return below never violates hook order.
+     */
+    interactive?: boolean;
 };
 
-function ComponentRendererBase({ node }: Props) {
+function ComponentRendererBase({ node, interactive = true }: Props) {
+    if (!interactive) {
+        return <PassiveNode node={node} />;
+    }
     // Every node goes through the same wrapper pipeline:
     // GestureDetector catches taps/long-press drags,
     // Animated.View applies temporary drag movement,
@@ -139,6 +150,75 @@ function ComponentRendererBase({ node }: Props) {
 
 const ComponentRenderer = memo(ComponentRendererBase);
 export default ComponentRenderer;
+
+/**
+ * PassiveNode mirrors the visual output of ComponentRendererBase with
+ * plain views: no GestureDetector, no drag state, no layout reporting,
+ * no selection ring. Recurses into itself so whole subtrees stay passive.
+ */
+function PassiveNode({ node }: { node: ComponentNode }) {
+    const s = getNodeStyle(node, false, false);
+
+    switch (node.type) {
+        case 'View':
+            return (
+                <View style={s.view}>
+                    <View style={s.viewChildren}>
+                        {node.children?.map((child) => (
+                            <PassiveNode key={child.id} node={child} />
+                        ))}
+                    </View>
+                </View>
+            );
+
+        case 'ScrollView':
+            return (
+                <View style={s.view}>
+                    <ScrollView
+                        style={s.scrollView}
+                        contentContainerStyle={s.scrollViewContent}
+                        nestedScrollEnabled={node.style.nestedScrollEnabled}
+                        horizontal={node.style.horizontal}
+                        showsVerticalScrollIndicator={node.style.showsVerticalScrollIndicator}
+                        showsHorizontalScrollIndicator={node.style.showsHorizontalScrollIndicator}
+                    >
+                        {node.children?.map((child) => (
+                            <PassiveNode key={child.id} node={child} />
+                        ))}
+                    </ScrollView>
+                </View>
+            );
+
+        case 'Text':
+            return <Text style={s.text}>{node.content}</Text>;
+
+        case 'Button':
+            return (
+                <View style={s.button}>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={s.buttonLabel}>{node.content}</Text>
+                    </View>
+                </View>
+            );
+
+        case 'Image':
+            return (
+                <View style={s.image}>
+                    <View style={{ flex: 1 }}>
+                        {node.content ? (
+                            <View pointerEvents="none" style={s.imageFill}>
+                                <Image source={{ uri: node.content }} style={s.imageFill} />
+                            </View>
+                        ) : (
+                            <View pointerEvents="none" style={s.imagePlaceholder}>
+                                <Text style={s.imagePlaceholderIcon}>IMG</Text>
+                            </View>
+                        )}
+                    </View>
+                </View>
+            );
+    }
+}
 
 
 /* TLDR;
