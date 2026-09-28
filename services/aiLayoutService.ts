@@ -1,6 +1,10 @@
 import { ComponentNode, CanvasConfig } from '@/editor/componentNodeTypes'
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_AI_BACKEND_URL || 'http://localhost:3000'
+const PROD_BACKEND_URL = 'https://makeui-backend.vercel.app'
+// EXPO_PUBLIC vars are inlined at build time. .env is gitignored, so EAS cloud
+// builds have no .env unless vars are set as EAS secrets / eas.json env.
+// Default to production so a missing env never falls back to localhost on-device.
+const BACKEND_URL = process.env.EXPO_PUBLIC_AI_BACKEND_URL || PROD_BACKEND_URL
 const AUTH_TOKEN = process.env.EXPO_PUBLIC_AI_AUTH_TOKEN
 
 const TIMEOUT_MS = 60_000
@@ -45,6 +49,16 @@ export async function generateLayoutSuggestions(
     const data = await res.json()
     console.log('[AiLayout] Success', data)
     return data
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      throw new Error('AI request timed out. Please try again.')
+    }
+    if (e instanceof TypeError && e.message.includes('Network request failed')) {
+      throw new Error(
+        `Cannot reach AI backend at ${BACKEND_URL}. Check your connection and that the backend is deployed.`
+      )
+    }
+    throw e
   } finally {
     clearTimeout(timeout)
   }
