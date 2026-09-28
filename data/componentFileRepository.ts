@@ -45,7 +45,6 @@ const ensureTable = async (): Promise<SQLite.SQLiteDatabase> => {
     const db = await dbPromise;
     if (!isInitialized) {
         await db.execAsync(`
-            DROP TABLE IF EXISTS component_files;
             CREATE TABLE IF NOT EXISTS component_files (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 project_id INTEGER, -- makes a component file belong to a project

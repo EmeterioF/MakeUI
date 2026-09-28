@@ -50,10 +50,13 @@ export async function generateLayoutSuggestions(
     console.log('[AiLayout] Success', data)
     return data
   } catch (e) {
-    if (e instanceof DOMException && e.name === 'AbortError') {
+    // NOTE: no `instanceof DOMException` here. DOMException is a web-only global
+    // and is undefined in the Hermes runtime, so referencing it throws
+    // ReferenceError ("Can't find variable: DOMException") and masks the real error.
+    if (e instanceof Error && e.name === 'AbortError') {
       throw new Error('AI request timed out. Please try again.')
     }
-    if (e instanceof TypeError && e.message.includes('Network request failed')) {
+    if (e instanceof Error && e.message.includes('Network request failed')) {
       throw new Error(
         `Cannot reach AI backend at ${BACKEND_URL}. Check your connection and that the backend is deployed.`
       )
