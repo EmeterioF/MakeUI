@@ -151,11 +151,15 @@ export function AiPreviewOverlay() {
                 </Text>
               </Pressable>
               {expanded && (
-                <View style={styles.whyList}>
+                <ScrollView
+                  style={styles.whyListScroll}
+                  contentContainerStyle={styles.whyList}
+                  showsVerticalScrollIndicator={false}
+                >
                   {currentImprovements.map((item, i) => (
                     <Text key={i} style={styles.whyItem}>• {item}</Text>
                   ))}
-                </View>
+                </ScrollView>
               )}
             </View>
           )}
@@ -289,12 +293,18 @@ const styles = StyleSheet.create({
   },
   whyList: {
     marginTop: 4,
-    gap: 2,
+    gap: 6,
+    paddingHorizontal: 4,
+    paddingBottom: 8,
+  },
+  whyListScroll: {
+    maxHeight: 100,
   },
   whyItem: {
     fontSize: 12,
     color: '#555',
     lineHeight: 18,
+    paddingRight: 8,
   },
   dotsRow: {
     flexDirection: 'row',

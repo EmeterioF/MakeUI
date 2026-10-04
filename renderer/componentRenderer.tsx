@@ -158,11 +158,15 @@ export default ComponentRenderer;
  */
 function PassiveNode({ node }: { node: ComponentNode }) {
     const s = getNodeStyle(node, false, false);
+    // Constrain preview nodes to the carousel page width so children
+    // that exceed the preview bounds are clipped instead of overflowing.
+    // Interactive rendering is untouched, so Apply output is unchanged.
+    const previewConstraint = { maxWidth: '100%' as const, overflow: 'hidden' as const };
 
     switch (node.type) {
         case 'View':
             return (
-                <View style={s.view}>
+                <View style={[...s.view, previewConstraint]}>
                     <View style={s.viewChildren}>
                         {node.children?.map((child) => (
                             <PassiveNode key={child.id} node={child} />
@@ -173,7 +177,7 @@ function PassiveNode({ node }: { node: ComponentNode }) {
 
         case 'ScrollView':
             return (
-                <View style={s.view}>
+                <View style={[...s.view, previewConstraint]}>
                     <ScrollView
                         style={s.scrollView}
                         contentContainerStyle={s.scrollViewContent}
@@ -190,11 +194,11 @@ function PassiveNode({ node }: { node: ComponentNode }) {
             );
 
         case 'Text':
-            return <Text style={s.text}>{node.content}</Text>;
+            return <Text style={[...s.text, { maxWidth: '100%' as const }]}>{node.content}</Text>;
 
         case 'Button':
             return (
-                <View style={s.button}>
+                <View style={[...s.button, previewConstraint]}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={s.buttonLabel}>{node.content}</Text>
                     </View>
@@ -203,7 +207,7 @@ function PassiveNode({ node }: { node: ComponentNode }) {
 
         case 'Image':
             return (
-                <View style={s.image}>
+                <View style={[...s.image, previewConstraint]}>
                     <View style={{ flex: 1 }}>
                         {node.content ? (
                             <View pointerEvents="none" style={s.imageFill}>
