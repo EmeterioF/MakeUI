@@ -158,19 +158,31 @@ export default ComponentRenderer;
  */
 function PassiveNode({ node }: { node: ComponentNode }) {
     const s = getNodeStyle(node, false, false);
-    // Preview-only guards. The modal is narrower than the canvas, so text
-    // wraps onto more lines and fixed-height containers would spill their
-    // children out the bottom. Let preview containers size to content by
-    // dropping fixed height (min/maxHeight still apply). Width is capped
-    // so fixed-width nodes cannot push outside the page. No clipping is
-    // used. Interactive rendering is untouched, so Apply output is unchanged.
-    const previewFit = { maxWidth: '100%' as const, flexShrink: 1 as const, minWidth: 0 as const };
-    const previewAutoHeight = { height: 'auto' as const };
+    // Preview-only normalization. The modal is narrower than the canvas,
+    // so text wraps onto more lines: fixed heights spill children out,
+    // and the AI cards' own overflow:hidden + maxHeight then slice them
+    // mid-glyph at the box edge. Neutralize all three clipping sources so
+    // every node shows fully in preview. Interactive rendering is untouched,
+    // so Apply output is unchanged.
+    // Images keep their fixed height (auto height would collapse them).
+    const previewFit = {
+        maxWidth: '100%' as const,
+        flexShrink: 1 as const,
+        minWidth: 0 as const,
+        height: 'auto' as const,
+        maxHeight: 99999 as const,
+        overflow: 'visible' as const,
+    };
+    const previewBoxOnly = {
+        maxWidth: '100%' as const,
+        flexShrink: 1 as const,
+        minWidth: 0 as const,
+    };
 
     switch (node.type) {
         case 'View':
             return (
-                <View style={[...s.view, previewFit, previewAutoHeight]}>
+                <View style={[...s.view, previewFit]}>
                     <View style={s.viewChildren}>
                         {node.children?.map((child) => (
                             <PassiveNode key={child.id} node={child} />
@@ -181,7 +193,7 @@ function PassiveNode({ node }: { node: ComponentNode }) {
 
         case 'ScrollView':
             return (
-                <View style={[...s.view, previewFit, previewAutoHeight]}>
+                <View style={[...s.view, previewFit]}>
                     <ScrollView
                         style={s.scrollView}
                         contentContainerStyle={s.scrollViewContent}
@@ -198,11 +210,11 @@ function PassiveNode({ node }: { node: ComponentNode }) {
             );
 
         case 'Text':
-            return <Text style={[...s.text, { maxWidth: '100%' as const }]}>{node.content}</Text>;
+            return <Text style={[...s.text, previewFit]}>{node.content}</Text>;
 
         case 'Button':
             return (
-                <View style={[...s.button, previewFit, previewAutoHeight]}>
+                <View style={[...s.button, previewFit]}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={s.buttonLabel}>{node.content}</Text>
                     </View>
@@ -211,7 +223,7 @@ function PassiveNode({ node }: { node: ComponentNode }) {
 
         case 'Image':
             return (
-                <View style={[...s.image, previewFit]}>
+                <View style={[...s.image, previewBoxOnly]}>
                     <View style={{ flex: 1 }}>
                         {node.content ? (
                             <View pointerEvents="none" style={s.imageFill}>
