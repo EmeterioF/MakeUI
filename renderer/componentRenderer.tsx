@@ -158,15 +158,19 @@ export default ComponentRenderer;
  */
 function PassiveNode({ node }: { node: ComponentNode }) {
     const s = getNodeStyle(node, false, false);
-    // Constrain preview nodes to the carousel page width so children
-    // that exceed the preview bounds are clipped instead of overflowing.
-    // Interactive rendering is untouched, so Apply output is unchanged.
-    const previewConstraint = { maxWidth: '100%' as const, overflow: 'hidden' as const };
+    // Preview-only guards. The modal is narrower than the canvas, so text
+    // wraps onto more lines and fixed-height containers would spill their
+    // children out the bottom. Let preview containers size to content by
+    // dropping fixed height (min/maxHeight still apply). Width is capped
+    // so fixed-width nodes cannot push outside the page. No clipping is
+    // used. Interactive rendering is untouched, so Apply output is unchanged.
+    const previewFit = { maxWidth: '100%' as const, flexShrink: 1 as const, minWidth: 0 as const };
+    const previewAutoHeight = { height: 'auto' as const };
 
     switch (node.type) {
         case 'View':
             return (
-                <View style={[...s.view, previewConstraint]}>
+                <View style={[...s.view, previewFit, previewAutoHeight]}>
                     <View style={s.viewChildren}>
                         {node.children?.map((child) => (
                             <PassiveNode key={child.id} node={child} />
@@ -177,7 +181,7 @@ function PassiveNode({ node }: { node: ComponentNode }) {
 
         case 'ScrollView':
             return (
-                <View style={[...s.view, previewConstraint]}>
+                <View style={[...s.view, previewFit, previewAutoHeight]}>
                     <ScrollView
                         style={s.scrollView}
                         contentContainerStyle={s.scrollViewContent}
@@ -198,7 +202,7 @@ function PassiveNode({ node }: { node: ComponentNode }) {
 
         case 'Button':
             return (
-                <View style={[...s.button, previewConstraint]}>
+                <View style={[...s.button, previewFit, previewAutoHeight]}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={s.buttonLabel}>{node.content}</Text>
                     </View>
@@ -207,7 +211,7 @@ function PassiveNode({ node }: { node: ComponentNode }) {
 
         case 'Image':
             return (
-                <View style={[...s.image, previewConstraint]}>
+                <View style={[...s.image, previewFit]}>
                     <View style={{ flex: 1 }}>
                         {node.content ? (
                             <View pointerEvents="none" style={s.imageFill}>
