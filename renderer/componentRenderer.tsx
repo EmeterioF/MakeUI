@@ -164,7 +164,7 @@ export default ComponentRenderer;
  * plain views: no GestureDetector, no drag state, no layout reporting,
  * no selection ring. Recurses into itself so whole subtrees stay passive.
  */
-function PassiveNode({ node }: { node: ComponentNode }) {
+function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel?: boolean }) {
     const s = getNodeStyle(node, false, false);
     // Preview-only normalization. The modal is narrower than the canvas,
     // so text wraps onto more lines: fixed heights spill children out,
