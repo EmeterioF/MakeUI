@@ -198,7 +198,7 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
     switch (node.type) {
         case 'View':
             return (
-                <View style={[...s.view, previewFit]}>
+                <View style={[...s.view, previewFit, topGuard]}>
                     <View style={s.viewChildren}>
                         {node.children?.map((child) => (
                             <PassiveNode key={child.id} node={child} />
@@ -209,7 +209,7 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
 
         case 'ScrollView':
             return (
-                <View style={[...s.view, previewFit]}>
+                <View style={[...s.view, previewFit, topGuard]}>
                     <ScrollView
                         style={s.scrollView}
                         contentContainerStyle={s.scrollViewContent}
