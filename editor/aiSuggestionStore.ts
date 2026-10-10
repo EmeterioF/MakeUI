@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ComponentNode } from './componentNodeTypes';
+import { ComponentNode, CanvasConfig } from './componentNodeTypes';
 import { useComponentNodeStore } from './componentNodeStore';
 import { generateLayoutSuggestions } from '@/services/aiLayoutService';
 
@@ -12,6 +12,7 @@ interface AiSuggestion {
 interface AiSuggestionState {
   aiSuggestions: AiSuggestion[] | null;
   aiOriginalTree: ComponentNode[] | null;
+  aiOriginalCanvasConfig: CanvasConfig | null;
   selectedIndex: number;
   aiLoading: boolean;
   aiError: string | null;
@@ -32,40 +33,42 @@ interface AiSuggestionState {
 export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
   aiSuggestions: null,
   aiOriginalTree: null,
+  aiOriginalCanvasConfig: null,
   selectedIndex: 0,
   aiLoading: false,
   aiError: null,
   showAiPreview: false,
   undoAvailable: false,
 
-  fetchSuggestions: async () => {
-    const { componentTree, canvasConfig } = useComponentNodeStore.getState();
-    console.log("hit")
-    if (!componentTree || componentTree.length === 0) {
-      set({ aiError: 'No components to enhance. Add some components first.' });
-      return;
-    }
+fetchSuggestions: async () => {
+      const { componentTree, canvasConfig } = useComponentNodeStore.getState();
+      console.log("hit")
+      if (!componentTree || componentTree.length === 0) {
+        set({ aiError: 'No components to enhance. Add some components first.' });
+        return;
+      }
 
-    set({ aiLoading: true, aiError: null, undoAvailable: false });
+      set({ aiLoading: true, aiError: null, undoAvailable: false });
 
-    try {
-      const result = await generateLayoutSuggestions(componentTree, canvasConfig);
-      console.log('[AiStore] result keys:', Object.keys(result), 'suggestions count:', result.suggestions?.length)
+      try {
+        const result = await generateLayoutSuggestions(componentTree, canvasConfig);
+        console.log('[AiStore] result keys:', Object.keys(result), 'suggestions count:', result.suggestions?.length)
 
-      set({
-        aiSuggestions: result.suggestions,
-        aiOriginalTree: componentTree,
-        selectedIndex: 0,
-        showAiPreview: true,
-        aiLoading: false,
-      });
-    } catch (error) {
-      set({
-        aiError: error instanceof Error ? error.message : 'AI enhancement failed',
-        aiLoading: false,
-      });
-    }
-  },
+        set({
+          aiSuggestions: result.suggestions,
+          aiOriginalTree: componentTree,
+          aiOriginalCanvasConfig: canvasConfig,
+          selectedIndex: 0,
+          showAiPreview: true,
+          aiLoading: false,
+        });
+      } catch (error) {
+        set({
+          aiError: error instanceof Error ? error.message : 'AI enhancement failed',
+          aiLoading: false,
+        });
+      }
+    },
 
   selectSuggestion: (index: number) => {
     set({ selectedIndex: index });
@@ -100,13 +103,14 @@ export const useAiSuggestionStore = create<AiSuggestionState>((set, get) => ({
   },
 
   dismissUndo: () => {
-    set({ undoAvailable: false, aiOriginalTree: null });
+    set({ undoAvailable: false, aiOriginalTree: null, aiOriginalCanvasConfig: null });
   },
 
   discardSuggestions: () => {
     set({
       aiSuggestions: null,
       aiOriginalTree: null,
+      aiOriginalCanvasConfig: null,
       selectedIndex: 0,
       showAiPreview: false,
       aiError: null,
