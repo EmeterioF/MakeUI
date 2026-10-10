@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { ComponentNode, CanvasConfig } from './componentNodeTypes';
 import { useComponentNodeStore } from './componentNodeStore';
 import { generateLayoutSuggestions } from '@/services/aiLayoutService';
+import { createComponentFile } from '@/data/componentFileRepository';
+import { convertTreeToReactNativeCode } from '@/export/treeToReactNative';
 
 interface AiSuggestion {
   componentTree: ComponentNode[];
@@ -23,6 +25,7 @@ interface AiSuggestionState {
   fetchSuggestions: () => Promise<void>;
   selectSuggestion: (index: number) => void;
   applySuggestions: () => void;
+  applyWithBackup: (backupFileName: string) => Promise<void>;
   discardSuggestions: () => void;
   togglePreview: () => void;
   /** Restores the tree from before the last apply. Session-only, single level. */
@@ -79,6 +82,37 @@ fetchSuggestions: async () => {
     if (!aiSuggestions || selectedIndex < 1 || !aiSuggestions[selectedIndex - 1]) return;
 
     useComponentNodeStore.getState().replaceTree(aiSuggestions[selectedIndex - 1].componentTree);
+
+    set({
+      aiSuggestions: null,
+      // Keep aiOriginalTree so the apply can be undone below.
+      selectedIndex: 0,
+      showAiPreview: false,
+      aiError: null,
+      undoAvailable: true,
+    });
+  },
+
+  applyWithBackup: async (backupFileName: string) => {
+    const { aiSuggestions, selectedIndex, aiOriginalTree, aiOriginalCanvasConfig } = get();
+    if (!aiSuggestions || selectedIndex < 1 || !aiSuggestions[selectedIndex - 1] || !aiOriginalTree || !aiOriginalCanvasConfig) return;
+
+    const { currentFileId, currentFileName, currentProjectId } = useComponentNodeStore.getState();
+    const selectedSuggestion = aiSuggestions[selectedIndex - 1];
+
+    // Create backup file with original tree and canvas config
+    const code = convertTreeToReactNativeCode(aiOriginalTree, aiOriginalCanvasConfig);
+    const backupId = await createComponentFile(
+      backupFileName,
+      code,
+      aiOriginalTree,
+      aiOriginalCanvasConfig,
+      currentProjectId ?? undefined
+    );
+    console.log('[AiStore] Backup created:', backupId, backupFileName);
+
+    // Apply the AI suggestion to current editor
+    useComponentNodeStore.getState().replaceTree(selectedSuggestion.componentTree);
 
     set({
       aiSuggestions: null,
