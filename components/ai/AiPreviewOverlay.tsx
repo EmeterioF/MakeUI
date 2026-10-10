@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet, Modal, ScrollView, Dimensions } from
 import { useAiSuggestionStore } from '@/editor/aiSuggestionStore';
 import { useComponentNodeStore } from '@/editor/componentNodeStore';
 import ComponentRenderer from '@/renderer/componentRenderer';
+import { AiBackupConfirmDialog } from './AiBackupConfirmDialog';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CAROUSEL_WIDTH = SCREEN_WIDTH * 0.9;
@@ -15,6 +16,7 @@ export function AiPreviewOverlay() {
     showAiPreview,
     selectSuggestion,
     applySuggestions,
+    applyWithBackup,
     discardSuggestions,
     fetchSuggestions,
   } = useAiSuggestionStore();
@@ -22,6 +24,7 @@ export function AiPreviewOverlay() {
 
   const scrollRef = useRef<ScrollView>(null);
   const [expanded, setExpanded] = useState(false);
+  const [showBackupDialog, setShowBackupDialog] = useState(false);
 
   // Collapse the notes whenever the page changes so descriptions
   // never cover the picture uninvited.
@@ -74,6 +77,26 @@ export function AiPreviewOverlay() {
 
   const handleRegenerate = async () => {
     await fetchSuggestions();
+  };
+
+  const handleApplyWithBackup = (backupFileName: string) => {
+    setShowBackupDialog(false);
+    applyWithBackup(backupFileName);
+  };
+
+  const handleApplyWithoutBackup = () => {
+    setShowBackupDialog(false);
+    applySuggestions();
+  };
+
+  const handleOpenBackupDialog = () => {
+    if (selectedIndex > 0) {
+      setShowBackupDialog(true);
+    }
+  };
+
+  const handleCloseBackupDialog = () => {
+    setShowBackupDialog(false);
   };
 
   return (
@@ -186,13 +209,20 @@ export function AiPreviewOverlay() {
               <Text style={styles.discardText}>Discard</Text>
             </Pressable>
             {selectedIndex > 0 && (
-              <Pressable style={styles.applyBtn} onPress={applySuggestions}>
+              <Pressable style={styles.applyBtn} onPress={handleOpenBackupDialog}>
                 <Text style={styles.applyText}>Apply</Text>
               </Pressable>
             )}
           </View>
         </View>
       </View>
+
+      <AiBackupConfirmDialog
+        visible={showBackupDialog}
+        onClose={handleCloseBackupDialog}
+        onApplyWithBackup={handleApplyWithBackup}
+        onApplyWithoutBackup={handleApplyWithoutBackup}
+      />
     </Modal>
   );
 }
