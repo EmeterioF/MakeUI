@@ -121,7 +121,7 @@ export function AiPreviewOverlay() {
               <View style={styles.carouselPage}>
                 <View style={[styles.preview, canvasPreviewStyle]}>
                   {aiOriginalTree?.map((node) => (
-                    <ComponentRenderer key={node.id} node={node} interactive={false} />
+                    <ComponentRenderer key={node.id} node={node} interactive={false} previewTopLevel />
                   ))}
                 </View>
               </View>
