@@ -35,6 +35,14 @@ type Props = {
      * early return below never violates hook order.
      */
     interactive?: boolean;
+    /**
+     * Preview-only. True for nodes rendered directly into the AI preview
+     * frame. Their flex:1 default (basis 0) would otherwise split the
+     * fixed-height frame into forced shares that overflow and get cut;
+     * top-level nodes instead size to content. Children keep their flex
+     * behavior so inner row splits still work. Ignored when interactive.
+     */
+    previewTopLevel?: boolean;
 };
 
 function ComponentRendererBase({ node, interactive = true }: Props) {
