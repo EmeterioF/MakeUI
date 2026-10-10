@@ -18,7 +18,7 @@ type SaveComponentFileInput = {
 
 const FALLBACK_FILE_NAME = 'Untitled Screen.tsx';
 
-const cleanFileName = (fileName: string): string => {
+export const cleanFileName = (fileName: string): string => {
     const trimmed = fileName.trim();
     const safeName = trimmed.length > 0 ? trimmed.replace(/[<>:"/\\|?*]+/g, '-') : FALLBACK_FILE_NAME;
     return safeName.toLowerCase().endsWith('.tsx') ? safeName : `${safeName}.tsx`;
