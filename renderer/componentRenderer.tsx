@@ -226,11 +226,11 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
             );
 
         case 'Text':
-            return <Text style={[...s.text, previewFit]}>{node.content}</Text>;
+            return <Text style={[...s.text, previewFit, topGuard]}>{node.content}</Text>;
 
         case 'Button':
             return (
-                <View style={[...s.button, previewFit]}>
+                <View style={[...s.button, previewFit, topGuard]}>
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={s.buttonLabel}>{node.content}</Text>
                     </View>
