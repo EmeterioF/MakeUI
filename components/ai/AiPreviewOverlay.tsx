@@ -130,7 +130,7 @@ export function AiPreviewOverlay() {
                 <View key={index} style={styles.carouselPage}>
                   <View style={[styles.preview, canvasPreviewStyle]}>
                     {suggestion.componentTree.map((node) => (
-                      <ComponentRenderer key={node.id} node={node} interactive={false} />
+                      <ComponentRenderer key={node.id} node={node} interactive={false} previewTopLevel />
                     ))}
                   </View>
                 </View>
