@@ -45,9 +45,9 @@ type Props = {
     previewTopLevel?: boolean;
 };
 
-function ComponentRendererBase({ node, interactive = true }: Props) {
+function ComponentRendererBase({ node, interactive = true, previewTopLevel = false }: Props) {
     if (!interactive) {
-        return <PassiveNode node={node} />;
+        return <PassiveNode node={node} topLevel={previewTopLevel} />;
     }
     // Every node goes through the same wrapper pipeline:
     // GestureDetector catches taps/long-press drags,
