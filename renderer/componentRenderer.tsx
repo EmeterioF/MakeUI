@@ -181,6 +181,14 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
         maxHeight: 99999 as const,
         overflow: 'visible' as const,
     };
+    // Top-level nodes sit directly in the fixed-height preview frame, where
+    // their flex:1 default (basis 0) would split the frame into forced
+    // shares. Size them to content instead so they stack without overflow.
+    const previewTop = {
+        flexGrow: 0 as const,
+        flexBasis: 'auto' as const,
+    };
+    const topGuard = topLevel ? previewTop : null;
     const previewBoxOnly = {
         maxWidth: '100%' as const,
         flexShrink: 1 as const,
