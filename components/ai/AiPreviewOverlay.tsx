@@ -119,20 +119,34 @@ export function AiPreviewOverlay() {
               contentOffset={{ x: 0, y: 0 }}
             >
               <View style={styles.carouselPage}>
-                <View style={[styles.preview, canvasPreviewStyle]}>
-                  {aiOriginalTree?.map((node) => (
-                    <ComponentRenderer key={node.id} node={node} interactive={false} previewTopLevel />
-                  ))}
-                </View>
+                <ScrollView
+                  style={styles.pageScroll}
+                  contentContainerStyle={styles.pageScrollContent}
+                  showsVerticalScrollIndicator={false}
+                  nestedScrollEnabled
+                >
+                  <View style={[styles.preview, canvasPreviewStyle]}>
+                    {aiOriginalTree?.map((node) => (
+                      <ComponentRenderer key={node.id} node={node} interactive={false} previewTopLevel />
+                    ))}
+                  </View>
+                </ScrollView>
               </View>
 
               {aiSuggestions.map((suggestion, index) => (
                 <View key={index} style={styles.carouselPage}>
-                  <View style={[styles.preview, canvasPreviewStyle]}>
-                    {suggestion.componentTree.map((node) => (
-                      <ComponentRenderer key={node.id} node={node} interactive={false} previewTopLevel />
-                    ))}
-                  </View>
+                  <ScrollView
+                    style={styles.pageScroll}
+                    contentContainerStyle={styles.pageScrollContent}
+                    showsVerticalScrollIndicator={false}
+                    nestedScrollEnabled
+                  >
+                    <View style={[styles.preview, canvasPreviewStyle]}>
+                      {suggestion.componentTree.map((node) => (
+                        <ComponentRenderer key={node.id} node={node} interactive={false} previewTopLevel />
+                      ))}
+                    </View>
+                  </ScrollView>
                 </View>
               ))}
             </ScrollView>
