@@ -205,6 +205,13 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
         alignSelf: 'flex-start' as const,
     };
     const topGuardImage = topLevel ? previewTopImage : null;
+    // Inner growing wrappers (viewChildren, Button/Image inners) use flex:1
+    // to fill their parent on canvas. In a content-sized preview parent that
+    // flex:1 re-expands and reintroduces the forced-share overflow, so pin
+    // them to content height for top-level previews. Children keep flex.
+    const topInnerGuard = topLevel
+        ? ({ flex: 0 as const, flexGrow: 0 as const, flexShrink: 1 as const })
+        : null;
     const previewBoxOnly = {
         maxWidth: '100%' as const,
         flexShrink: 1 as const,
@@ -215,7 +222,7 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
         case 'View':
             return (
                 <View style={[...s.view, previewFit, topGuard]}>
-                    <View style={s.viewChildren}>
+                    <View style={[s.viewChildren, topInnerGuard]}>
                         {node.children?.map((child) => (
                             <PassiveNode key={child.id} node={child} />
                         ))}
@@ -247,7 +254,7 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
         case 'Button':
             return (
                 <View style={[...s.button, previewFit, topGuard]}>
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center' }, topInnerGuard]}>
                         <Text style={s.buttonLabel}>{node.content}</Text>
                     </View>
                 </View>
@@ -256,7 +263,7 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
         case 'Image':
             return (
                 <View style={[...s.image, previewBoxOnly, topGuardImage]}>
-                    <View style={{ flex: 1 }}>
+                    <View style={[{ flex: 1 }, topInnerGuard]}>
                         {node.content ? (
                             <View pointerEvents="none" style={s.imageFill}>
                                 <Image source={{ uri: node.content }} style={s.imageFill} />
