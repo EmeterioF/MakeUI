@@ -89,14 +89,14 @@ export function AiBackupConfirmDialog({
         </View>
 
         <View style={styles.actions}>
-          <Pressable style={styles.cancelBtn} onPress={onClose}>
-            <Text style={styles.cancelText}>Cancel</Text>
+          <Pressable style={styles.applyBackupBtn} onPress={handleApplyWithBackup}>
+            <Text style={styles.applyBackupText}>Save backup & Apply</Text>
           </Pressable>
           <Pressable style={styles.applyNoBackupBtn} onPress={handleApplyWithoutBackup}>
             <Text style={styles.applyNoBackupText}>Apply without backup</Text>
           </Pressable>
-          <Pressable style={styles.applyBackupBtn} onPress={handleApplyWithBackup}>
-            <Text style={styles.applyBackupText}>Save backup & Apply</Text>
+          <Pressable style={styles.cancelBtn} onPress={onClose}>
+            <Text style={styles.cancelText}>Cancel</Text>
           </Pressable>
         </View>
       </View>
@@ -180,48 +180,49 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     padding: 16,
-    gap: 8,
+    paddingTop: 12,
+    gap: 10,
     borderTopWidth: 1,
     borderTopColor: '#eee',
   },
-  cancelBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    alignItems: 'center',
-  },
-  cancelText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#666',
-  },
-  applyNoBackupBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#FFF5F5',
-    borderWidth: 1,
-    borderColor: '#FC8181',
-    alignItems: 'center',
-  },
-  applyNoBackupText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#E53E3E',
-  },
   applyBackupBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 10,
     backgroundColor: '#007AFF',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   applyBackupText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#fff',
+  },
+  applyNoBackupBtn: {
+    paddingVertical: 13,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#FC8181',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  applyNoBackupText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#E53E3E',
+  },
+  cancelBtn: {
+    paddingVertical: 13,
+    borderRadius: 10,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
   },
 });
