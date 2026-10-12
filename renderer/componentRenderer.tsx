@@ -184,9 +184,15 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
     // Top-level nodes sit directly in the fixed-height preview frame, where
     // their flex:1 default (basis 0) would split the frame into forced
     // shares. Size them to content instead so they stack without overflow.
+    // NOTE: `flex:1` is a shorthand — overriding only flexGrow/flexBasis
+    // does not reliably win over it, so neutralize `flex` itself as well.
     const previewTop = {
+        flex: 0 as const,
         flexGrow: 0 as const,
+        flexShrink: 1 as const,
         flexBasis: 'auto' as const,
+        alignSelf: 'stretch' as const,
+        width: '100%' as const,
     };
     const topGuard = topLevel ? previewTop : null;
     const previewBoxOnly = {
