@@ -265,15 +265,22 @@ const styles = StyleSheet.create({
   carouselPage: {
     width: CAROUSEL_WIDTH,
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 8,
   },
-  preview: {
+  pageScroll: {
     flex: 1,
     width: '100%',
-    marginHorizontal: 8,
+  },
+  pageScrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  preview: {
+    flexGrow: 1,
+    width: '100%',
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   whyBox: {
     borderTopWidth: 1,
