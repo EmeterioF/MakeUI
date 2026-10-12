@@ -195,6 +195,16 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
         width: '100%' as const,
     };
     const topGuard = topLevel ? previewTop : null;
+    // Images keep their intrinsic size — stretching them to 100% width
+    // would distort fixed-size images, so only neutralize flex growth.
+    const previewTopImage = {
+        flex: 0 as const,
+        flexGrow: 0 as const,
+        flexShrink: 1 as const,
+        flexBasis: 'auto' as const,
+        alignSelf: 'flex-start' as const,
+    };
+    const topGuardImage = topLevel ? previewTopImage : null;
     const previewBoxOnly = {
         maxWidth: '100%' as const,
         flexShrink: 1 as const,
@@ -245,7 +255,7 @@ function PassiveNode({ node, topLevel = false }: { node: ComponentNode; topLevel
 
         case 'Image':
             return (
-                <View style={[...s.image, previewBoxOnly]}>
+                <View style={[...s.image, previewBoxOnly, topGuardImage]}>
                     <View style={{ flex: 1 }}>
                         {node.content ? (
                             <View pointerEvents="none" style={s.imageFill}>
